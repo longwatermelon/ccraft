@@ -44,19 +44,6 @@ void world_render(struct World *w, RenderInfo *ri)
         glm_translate(model, w->chunks[i]->pos);
         shader_mat4(ri->shader, "model", model);
 
-        /* size_t n; */
-        /* float *tops = chunk_visible_verts(w->chunks[i], SIDE_TOP, &n); */
-
-        /* tex_bind(w->tex->top, 0); */
-
-        /* glBindBuffer(GL_ARRAY_BUFFER, g_vb); */
-        /* glBufferSubData(GL_ARRAY_BUFFER, 0, n * sizeof(float), tops); */
-        /* glBindBuffer(GL_ARRAY_BUFFER, 0); */
-
-        /* glBindVertexArray(g_vao); */
-        /* glDrawArrays(GL_TRIANGLES, 0, n / 8); */
-        /* glBindVertexArray(0); */
-
         world_render_side(w, ri, w->chunks[i], SIDE_TOP);
         world_render_side(w, ri, w->chunks[i], SIDE_SIDE);
         world_render_side(w, ri, w->chunks[i], SIDE_BOT);
