@@ -1,5 +1,5 @@
 #include "prog.h"
-#include "chunk.h"
+#include "world.h"
 
 
 int main()
@@ -17,7 +17,7 @@ int main()
 
     glViewport(0, 0, 800, 600);
 
-    chunk_init_renderer();
+    world_init_renderer();
 
     struct Prog *p = prog_alloc(win);
     prog_mainloop(p);

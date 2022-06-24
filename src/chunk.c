@@ -1,5 +1,7 @@
 #include "chunk.h"
 #include "shader.h"
+#include "util.h"
+#include <string.h>
 #include <glad/glad.h>
 
 float g_left[] = {
@@ -56,8 +58,6 @@ float g_top[] = {
      0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f
 };
 
-unsigned int g_vao, g_vb;
-
 struct CubeTexture *ct_alloc(const char *top, const char *bot, const char *side)
 {
     struct CubeTexture *ct = malloc(sizeof(struct CubeTexture));
@@ -104,10 +104,12 @@ void chunk_free(struct Chunk *c)
 }
 
 
-void chunk_render(struct Chunk *c, RenderInfo *ri, struct CubeTexture *tex)
+float *chunk_visible_verts(struct Chunk *c, int side, size_t *n)
 {
-    shader_mat4(ri->shader, "view", ri->view);
-    shader_mat4(ri->shader, "projection", ri->proj);
+    float *verts = 0;
+    *n = 0;
+
+    size_t n2 = sizeof(g_top) / sizeof(float);
 
     for (int x = 0; x < 16; ++x)
     {
@@ -115,48 +117,59 @@ void chunk_render(struct Chunk *c, RenderInfo *ri, struct CubeTexture *tex)
         {
             for (int z = 0; z < 16; ++z)
             {
-                chunk_render_cube(c, ri, x, y, z, tex);
+                if (!chunk_get(c, x, y, z))
+                    continue;
+
+                float face[48];
+                ivec3 pos = { x, y, z };
+
+                switch (side)
+                {
+                case SIDE_TOP:
+                    if (!chunk_get(c, x, y + 1, z))
+                    {
+                        chunk_face_at(c, pos, g_top, face);
+                        ARR_APPEND(verts, *n, face, n2, float);
+                    }
+                    break;
+                case SIDE_BOT:
+                    if (!chunk_get(c, x, y - 1, z))
+                    {
+                        chunk_face_at(c, pos, g_bottom, face);
+                        ARR_APPEND(verts, *n, face, n2, float);
+                    }
+                    break;
+                case SIDE_SIDE:
+                {
+                    bool append = false;
+
+                    if (!chunk_get(c, x + 1, y, z)) { chunk_face_at(c, pos, g_back, face); append = true; }
+                    if (!chunk_get(c, x - 1, y, z)) { chunk_face_at(c, pos, g_front, face); append = true; }
+                    if (!chunk_get(c, x, y, z + 1)) { chunk_face_at(c, pos, g_right, face); append = true; }
+                    if (!chunk_get(c, x, y, z - 1)) { chunk_face_at(c, pos, g_left, face); append = true; }
+
+                    if (append)
+                        ARR_APPEND(verts, *n, face, n2, float);
+                } break;
+                }
             }
         }
     }
+
+    return verts;
 }
 
 
-void chunk_render_cube(struct Chunk *c, RenderInfo *ri, int x, int y, int z, struct CubeTexture *tex)
+void chunk_face_at(struct Chunk *c, ivec3 pos, float *face, float dest[48])
 {
-    if (!chunk_get(c, x, y, z))
-        return;
+    memcpy(dest, face, 48 * sizeof(float));
 
-    mat4 model;
-    glm_mat4_identity(model);
-
-    vec3 pos;
-    glm_vec3_add(c->pos, (vec3){ x, y, z }, pos);
-
-    glm_translate(model, pos);
-    shader_mat4(ri->shader, "model", model);
-
-    if (!chunk_get(c, x + 1, y, z)) chunk_render_face(c, ri, x, y, z, g_back, tex->side);
-    if (!chunk_get(c, x - 1, y, z)) chunk_render_face(c, ri, x, y, z, g_front, tex->side);
-    if (!chunk_get(c, x, y + 1, z)) chunk_render_face(c, ri, x, y, z, g_top, tex->top);
-    if (!chunk_get(c, x, y - 1, z)) chunk_render_face(c, ri, x, y, z, g_bottom, tex->bottom);
-    if (!chunk_get(c, x, y, z + 1)) chunk_render_face(c, ri, x, y, z, g_right, tex->side);
-    if (!chunk_get(c, x, y, z - 1)) chunk_render_face(c, ri, x, y, z, g_left, tex->side);
-}
-
-
-void chunk_render_face(struct Chunk *c, RenderInfo *ri, int x, int y, int z, float *face, struct Texture *tex)
-{
-    tex_bind(tex, 0);
-
-    glBindBuffer(GL_ARRAY_BUFFER, g_vb);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, 8 * 6 * sizeof(float), face);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-    glBindVertexArray(g_vao);
-    glDrawArrays(GL_TRIANGLES, 0, 6);
-
-    glBindVertexArray(0);
+    for (int i = 0; i < 48; i += 8)
+    {
+        dest[i] += pos[0];
+        dest[i + 1] += pos[1];
+        dest[i + 2] += pos[2];
+    }
 }
 
 
@@ -166,28 +179,5 @@ int chunk_get(struct Chunk *c, int x, int y, int z)
         return 0;
 
     return c->grid[x][y][z];
-}
-
-
-void chunk_init_renderer()
-{
-    glGenVertexArrays(1, &g_vao);
-    glBindVertexArray(g_vao);
-
-    glGenBuffers(1, &g_vb);
-    glBindBuffer(GL_ARRAY_BUFFER, g_vb);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(g_top), 0, GL_DYNAMIC_DRAW);
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), 0);
-    glEnableVertexAttribArray(0);
-
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
-
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
-    glEnableVertexAttribArray(2);
-
-    glBindVertexArray(0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 

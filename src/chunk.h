@@ -3,7 +3,15 @@
 
 #include "render.h"
 #include "texture.h"
+#include <sys/types.h>
 #include <cglm/cglm.h>
+
+enum
+{
+    SIDE_TOP,
+    SIDE_SIDE,
+    SIDE_BOT
+};
 
 struct CubeTexture
 {
@@ -22,13 +30,14 @@ struct Chunk
 struct Chunk *chunk_alloc(vec3 pos);
 void chunk_free(struct Chunk *c);
 
-void chunk_render(struct Chunk *c, RenderInfo *ri, struct CubeTexture *tex);
-void chunk_render_cube(struct Chunk *c, RenderInfo *ri, int x, int y, int z, struct CubeTexture *tex);
-void chunk_render_face(struct Chunk *c, RenderInfo *ri, int x, int y, int z, float *face, struct Texture *tex);
+/* void chunk_render(struct Chunk *c, RenderInfo *ri, struct CubeTexture *tex); */
+/* void chunk_render_cube(struct Chunk *c, RenderInfo *ri, int x, int y, int z, struct CubeTexture *tex); */
+/* void chunk_render_face(struct Chunk *c, RenderInfo *ri, int x, int y, int z, float *face, struct Texture *tex); */
+
+float *chunk_visible_verts(struct Chunk *c, int side, size_t *n);
+void chunk_face_at(struct Chunk *c, ivec3 pos, float *face, float dest[48]);
 
 int chunk_get(struct Chunk *c, int x, int y, int z);
-
-void chunk_init_renderer();
 
 #endif
 
