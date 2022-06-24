@@ -37,7 +37,7 @@ void chunk_free(struct Chunk *c);
 float *chunk_visible_verts(struct Chunk *c, int side, size_t *n);
 void chunk_face_at(struct Chunk *c, ivec3 pos, float *face, float dest[48]);
 
-int chunk_get(struct Chunk *c, int x, int y, int z);
+int chunk_get(struct Chunk *c, ivec3 pos);
 
 #endif
 

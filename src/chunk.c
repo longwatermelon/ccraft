@@ -117,7 +117,7 @@ float *chunk_visible_verts(struct Chunk *c, int side, size_t *n)
         {
             for (int z = 0; z < 16; ++z)
             {
-                if (!chunk_get(c, x, y, z))
+                if (!chunk_get(c, (ivec3){ x, y, z }))
                     continue;
 
                 float face[48];
@@ -126,14 +126,14 @@ float *chunk_visible_verts(struct Chunk *c, int side, size_t *n)
                 switch (side)
                 {
                 case SIDE_TOP:
-                    if (!chunk_get(c, x, y + 1, z))
+                    if (!chunk_get(c, (ivec3){ x, y + 1, z }))
                     {
                         chunk_face_at(c, pos, g_top, face);
                         ARR_APPEND(verts, *n, face, n2, float);
                     }
                     break;
                 case SIDE_BOT:
-                    if (!chunk_get(c, x, y - 1, z))
+                    if (!chunk_get(c, (ivec3){ x, y - 1, z }))
                     {
                         chunk_face_at(c, pos, g_bottom, face);
                         ARR_APPEND(verts, *n, face, n2, float);
@@ -143,10 +143,10 @@ float *chunk_visible_verts(struct Chunk *c, int side, size_t *n)
                 {
                     bool append = false;
 
-                    if (!chunk_get(c, x + 1, y, z)) { chunk_face_at(c, pos, g_back, face); append = true; }
-                    if (!chunk_get(c, x - 1, y, z)) { chunk_face_at(c, pos, g_front, face); append = true; }
-                    if (!chunk_get(c, x, y, z + 1)) { chunk_face_at(c, pos, g_right, face); append = true; }
-                    if (!chunk_get(c, x, y, z - 1)) { chunk_face_at(c, pos, g_left, face); append = true; }
+                    if (!chunk_get(c, (ivec3){ x + 1, y, z })) { chunk_face_at(c, pos, g_back, face); append = true; }
+                    if (!chunk_get(c, (ivec3){ x - 1, y, z })) { chunk_face_at(c, pos, g_front, face); append = true; }
+                    if (!chunk_get(c, (ivec3){ x, y, z + 1 })) { chunk_face_at(c, pos, g_right, face); append = true; }
+                    if (!chunk_get(c, (ivec3){ x, y, z - 1 })) { chunk_face_at(c, pos, g_left, face); append = true; }
 
                     if (append)
                         ARR_APPEND(verts, *n, face, n2, float);
@@ -173,11 +173,11 @@ void chunk_face_at(struct Chunk *c, ivec3 pos, float *face, float dest[48])
 }
 
 
-int chunk_get(struct Chunk *c, int x, int y, int z)
+int chunk_get(struct Chunk *c, ivec3 pos)
 {
-    if (x < 0 || x >= 16 || y < 0 || y >= 256 || z < 0 || z >= 16)
+    if (pos[0] < 0 || pos[0] >= 16 || pos[1] < 0 || pos[1] >= 256 || pos[2] < 0 || pos[2] >= 16)
         return 0;
 
-    return c->grid[x][y][z];
+    return c->grid[pos[0]][pos[1]][pos[2]];
 }
 
