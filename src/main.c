@@ -1,4 +1,5 @@
 #include "prog.h"
+#include "chunk.h"
 
 
 int main()
@@ -15,6 +16,8 @@ int main()
     gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
 
     glViewport(0, 0, 800, 600);
+
+    chunk_init_renderer();
 
     struct Prog *p = prog_alloc(win);
     prog_mainloop(p);
