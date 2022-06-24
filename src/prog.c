@@ -41,8 +41,13 @@ void prog_mainloop(struct Prog *p)
 
     struct World *w = world_alloc();
 
+    /* float prev = glfwGetTime(); */
+
     while (!glfwWindowShouldClose(p->win))
     {
+        /* printf("%f\n", 1.f / (glfwGetTime() - prev)); */
+        /* prev = glfwGetTime(); */
+
         double mx, my;
         glfwGetCursorPos(p->win, &mx, &my);
 
