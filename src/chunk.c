@@ -58,6 +58,26 @@ float g_top[] = {
 
 unsigned int g_vao, g_vb;
 
+struct CubeTexture *ct_alloc(const char *top, const char *bot, const char *side)
+{
+    struct CubeTexture *ct = malloc(sizeof(struct CubeTexture));
+    ct->top = tex_alloc(top);
+    ct->bottom = tex_alloc(bot);
+    ct->side = tex_alloc(side);
+
+    return ct;
+}
+
+
+void ct_free(struct CubeTexture *ct)
+{
+    tex_free(ct->top);
+    tex_free(ct->bottom);
+    tex_free(ct->side);
+    free(ct);
+}
+
+
 struct Chunk *chunk_alloc(vec3 pos)
 {
     struct Chunk *c = malloc(sizeof(struct Chunk));
@@ -84,7 +104,7 @@ void chunk_free(struct Chunk *c)
 }
 
 
-void chunk_render(struct Chunk *c, RenderInfo *ri)
+void chunk_render(struct Chunk *c, RenderInfo *ri, struct CubeTexture *tex)
 {
     shader_mat4(ri->shader, "view", ri->view);
     shader_mat4(ri->shader, "projection", ri->proj);
@@ -95,14 +115,14 @@ void chunk_render(struct Chunk *c, RenderInfo *ri)
         {
             for (int z = 0; z < 16; ++z)
             {
-                chunk_render_cube(c, ri, x, y, z);
+                chunk_render_cube(c, ri, x, y, z, tex);
             }
         }
     }
 }
 
 
-void chunk_render_cube(struct Chunk *c, RenderInfo *ri, int x, int y, int z)
+void chunk_render_cube(struct Chunk *c, RenderInfo *ri, int x, int y, int z, struct CubeTexture *tex)
 {
     if (!chunk_get(c, x, y, z))
         return;
@@ -116,17 +136,19 @@ void chunk_render_cube(struct Chunk *c, RenderInfo *ri, int x, int y, int z)
     glm_translate(model, pos);
     shader_mat4(ri->shader, "model", model);
 
-    if (!chunk_get(c, x + 1, y, z)) chunk_render_face(c, ri, x, y, z, g_back);
-    if (!chunk_get(c, x - 1, y, z)) chunk_render_face(c, ri, x, y, z, g_front);
-    if (!chunk_get(c, x, y + 1, z)) chunk_render_face(c, ri, x, y, z, g_top);
-    if (!chunk_get(c, x, y - 1, z)) chunk_render_face(c, ri, x, y, z, g_bottom);
-    if (!chunk_get(c, x, y, z + 1)) chunk_render_face(c, ri, x, y, z, g_right);
-    if (!chunk_get(c, x, y, z - 1)) chunk_render_face(c, ri, x, y, z, g_left);
+    if (!chunk_get(c, x + 1, y, z)) chunk_render_face(c, ri, x, y, z, g_back, tex->side);
+    if (!chunk_get(c, x - 1, y, z)) chunk_render_face(c, ri, x, y, z, g_front, tex->side);
+    if (!chunk_get(c, x, y + 1, z)) chunk_render_face(c, ri, x, y, z, g_top, tex->top);
+    if (!chunk_get(c, x, y - 1, z)) chunk_render_face(c, ri, x, y, z, g_bottom, tex->bottom);
+    if (!chunk_get(c, x, y, z + 1)) chunk_render_face(c, ri, x, y, z, g_right, tex->side);
+    if (!chunk_get(c, x, y, z - 1)) chunk_render_face(c, ri, x, y, z, g_left, tex->side);
 }
 
 
-void chunk_render_face(struct Chunk *c, RenderInfo *ri, int x, int y, int z, float *face)
+void chunk_render_face(struct Chunk *c, RenderInfo *ri, int x, int y, int z, float *face, struct Texture *tex)
 {
+    tex_bind(tex, 0);
+
     glBindBuffer(GL_ARRAY_BUFFER, g_vb);
     glBufferSubData(GL_ARRAY_BUFFER, 0, 8 * 6 * sizeof(float), face);
     glBindBuffer(GL_ARRAY_BUFFER, 0);

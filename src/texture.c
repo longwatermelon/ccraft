@@ -5,10 +5,9 @@
 #include <stb/stb_image.h>
 
 
-struct Texture *tex_alloc(const char *path, int type)
+struct Texture *tex_alloc(const char *path)
 {
     struct Texture *t = malloc(sizeof(struct Texture));
-    t->type = type;
 
     strcpy(t->path, path);
 

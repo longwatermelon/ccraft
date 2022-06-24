@@ -2,7 +2,16 @@
 #define CHUNK_H
 
 #include "render.h"
+#include "texture.h"
 #include <cglm/cglm.h>
+
+struct CubeTexture
+{
+    struct Texture *top, *bottom, *side;
+};
+
+struct CubeTexture *ct_alloc(const char *top, const char *bot, const char *side);
+void ct_free(struct CubeTexture *ct);
 
 struct Chunk
 {
@@ -13,9 +22,9 @@ struct Chunk
 struct Chunk *chunk_alloc(vec3 pos);
 void chunk_free(struct Chunk *c);
 
-void chunk_render(struct Chunk *c, RenderInfo *ri);
-void chunk_render_cube(struct Chunk *c, RenderInfo *ri, int x, int y, int z);
-void chunk_render_face(struct Chunk *c, RenderInfo *ri, int x, int y, int z, float *face);
+void chunk_render(struct Chunk *c, RenderInfo *ri, struct CubeTexture *tex);
+void chunk_render_cube(struct Chunk *c, RenderInfo *ri, int x, int y, int z, struct CubeTexture *tex);
+void chunk_render_face(struct Chunk *c, RenderInfo *ri, int x, int y, int z, float *face, struct Texture *tex);
 
 int chunk_get(struct Chunk *c, int x, int y, int z);
 

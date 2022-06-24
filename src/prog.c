@@ -1,5 +1,6 @@
 #include "prog.h"
 #include "chunk.h"
+#include "world.h"
 #include <stb/stb_image.h>
 #include <stdlib.h>
 
@@ -38,7 +39,7 @@ void prog_mainloop(struct Prog *p)
     double prev_mx, prev_my;
     glfwGetCursorPos(p->win, &prev_mx, &prev_my);
 
-    struct Chunk *c = chunk_alloc((vec3){ 0.f, -15.f, 0.f });
+    struct World *w = world_alloc();
 
     while (!glfwWindowShouldClose(p->win))
     {
@@ -59,14 +60,13 @@ void prog_mainloop(struct Prog *p)
         cam_set_props(p->cam, p->ri->shader);
         cam_view_mat(p->cam, p->ri->view);
 
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-        chunk_render(c, p->ri);
+        world_render(w, p->ri);
 
         glfwSwapBuffers(p->win);
         glfwPollEvents();
     }
 
-    chunk_free(c);
+    world_free(w);
 }
 
 
