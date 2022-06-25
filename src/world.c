@@ -6,16 +6,19 @@ unsigned int g_vao, g_vb;
 struct World *world_alloc()
 {
     struct World *w = malloc(sizeof(struct World));
-    w->chunks = malloc(sizeof(struct Chunk*) * 4);
-    w->nchunks = 4;
 
-    for (size_t i = 0; i < 2; ++i)
+    w->nchunks = 36;
+    w->chunks = malloc(sizeof(struct Chunk*) * w->nchunks);
+
+    size_t idx = 0;
+
+    for (int x = -48; x < 48; x += 16)
     {
-        w->chunks[i] = chunk_alloc(w, (vec3){ i * 16, -15.f, 0.f });
+        for (int z = -48; z < 48; z += 16)
+        {
+            w->chunks[idx++] = chunk_alloc(w, (vec3){ x, -15.f, z });
+        }
     }
-
-    w->chunks[2] = chunk_alloc(w, (vec3){ 0.f, -15.f, -16.f });
-    w->chunks[3] = chunk_alloc(w, (vec3){ 0.f, -15.f, 16.f });
 
     w->tex = ct_alloc("res/cube/top.png", "res/cube/bottom.png", "res/cube/side.png");
 
