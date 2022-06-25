@@ -1,6 +1,7 @@
 #include "chunk.h"
 #include "shader.h"
 #include "util.h"
+#include "world.h"
 #include <string.h>
 #include <glad/glad.h>
 
@@ -78,10 +79,11 @@ void ct_free(struct CubeTexture *ct)
 }
 
 
-struct Chunk *chunk_alloc(vec3 pos)
+struct Chunk *chunk_alloc(struct World *w, vec3 pos)
 {
     struct Chunk *c = malloc(sizeof(struct Chunk));
     glm_vec3_copy(pos, c->pos);
+    c->world = w;
 
     for (int x = 0; x < 16; ++x)
     {
@@ -175,8 +177,32 @@ void chunk_face_at(struct Chunk *c, ivec3 pos, float *face, float dest[48])
 
 int chunk_get(struct Chunk *c, ivec3 pos)
 {
-    if (pos[0] < 0 || pos[0] >= 16 || pos[1] < 0 || pos[1] >= 256 || pos[2] < 0 || pos[2] >= 16)
+    if (pos[1] < 0 || pos[1] >= 256)
         return 0;
+
+    bool x = pos[0] < 0 || pos[0] >= 16;
+    bool z = pos[2] < 0 || pos[2] >= 16;
+
+    if (x || z)
+    {
+        int sigx = x ? (pos[0] < 0 ? -1 : 1) : 0;
+        int sigz = z ? (pos[2] < 0 ? -1 : 1) : 0;
+
+        vec3 dir = { sigx, 0.f, sigz };
+        struct Chunk *adjacent = world_adjacent_chunk(c->world, c, dir);
+
+        if (adjacent)
+        {
+            int ix = x ? (pos[0] - 16 + (sigx < 0 ? 32 : 0)) : pos[0];
+            int iz = z ? (pos[2] - 16 + (sigz < 0 ? 32 : 0)) : pos[2];
+
+            return adjacent->grid[ix][pos[1]][iz];
+        }
+        else
+        {
+            return 0;
+        }
+    }
 
     return c->grid[pos[0]][pos[1]][pos[2]];
 }

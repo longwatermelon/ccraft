@@ -6,6 +6,8 @@
 #include <sys/types.h>
 #include <cglm/cglm.h>
 
+struct World;
+
 enum
 {
     SIDE_TOP,
@@ -25,9 +27,11 @@ struct Chunk
 {
     vec3 pos;
     int grid[16][256][16];
+
+    struct World *world;
 };
 
-struct Chunk *chunk_alloc(vec3 pos);
+struct Chunk *chunk_alloc(struct World *w, vec3 pos);
 void chunk_free(struct Chunk *c);
 
 /* void chunk_render(struct Chunk *c, RenderInfo *ri, struct CubeTexture *tex); */

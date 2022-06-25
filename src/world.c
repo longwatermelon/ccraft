@@ -6,13 +6,16 @@ unsigned int g_vao, g_vb;
 struct World *world_alloc()
 {
     struct World *w = malloc(sizeof(struct World));
-    w->chunks = malloc(sizeof(struct Chunk*) * 10);
-    w->nchunks = 10;
+    w->chunks = malloc(sizeof(struct Chunk*) * 4);
+    w->nchunks = 4;
 
-    for (size_t i = 0; i < 10; ++i)
+    for (size_t i = 0; i < 2; ++i)
     {
-        w->chunks[i] = chunk_alloc((vec3){ i * 16, -15.f, 0.f });
+        w->chunks[i] = chunk_alloc(w, (vec3){ i * 16, -15.f, 0.f });
     }
+
+    w->chunks[2] = chunk_alloc(w, (vec3){ 0.f, -15.f, -16.f });
+    w->chunks[3] = chunk_alloc(w, (vec3){ 0.f, -15.f, 16.f });
 
     w->tex = ct_alloc("res/cube/top.png", "res/cube/bottom.png", "res/cube/side.png");
 
@@ -70,6 +73,27 @@ void world_render_side(struct World *w, RenderInfo *ri, struct Chunk *c, int sid
     glBindVertexArray(g_vao);
     glDrawArrays(GL_TRIANGLES, 0, n / 8);
     glBindVertexArray(0);
+}
+
+
+struct Chunk *world_adjacent_chunk(struct World *w, struct Chunk *c, vec3 dir)
+{
+    vec3 offset;
+    glm_vec3_scale(dir, 16.f, offset);
+
+    vec3 target;
+    glm_vec3_add(c->pos, offset, target);
+
+    for (size_t i = 0; i < w->nchunks; ++i)
+    {
+        // Ignore y component
+        target[1] = w->chunks[i]->pos[1];
+
+        if (glm_vec3_distance(target, w->chunks[i]->pos) < 1.f)
+            return w->chunks[i];
+    }
+
+    return 0;
 }
 
 
