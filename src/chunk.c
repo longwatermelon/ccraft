@@ -143,15 +143,29 @@ float *chunk_visible_verts(struct Chunk *c, int side, size_t *n)
                     break;
                 case SIDE_SIDE:
                 {
-                    bool append = false;
-
-                    if (!chunk_get(c, (ivec3){ x + 1, y, z })) { chunk_face_at(c, pos, g_back, face); append = true; }
-                    if (!append && !chunk_get(c, (ivec3){ x - 1, y, z })) { chunk_face_at(c, pos, g_front, face); append = true; }
-                    if (!append && !chunk_get(c, (ivec3){ x, y, z + 1 })) { chunk_face_at(c, pos, g_right, face); append = true; }
-                    if (!append && !chunk_get(c, (ivec3){ x, y, z - 1 })) { chunk_face_at(c, pos, g_left, face); append = true; }
-
-                    if (append)
+                    if (!chunk_get(c, (ivec3){ x + 1, y, z }))
+                    {
+                        chunk_face_at(c, pos, g_back, face);
                         ARR_APPEND(verts, *n, face, n2, float);
+                    }
+
+                    if (!chunk_get(c, (ivec3){ x - 1, y, z }))
+                    {
+                        chunk_face_at(c, pos, g_front, face);
+                        ARR_APPEND(verts, *n, face, n2, float);
+                    }
+
+                    if (!chunk_get(c, (ivec3){ x, y, z + 1 }))
+                    {
+                        chunk_face_at(c, pos, g_right, face);
+                        ARR_APPEND(verts, *n, face, n2, float);
+                    }
+
+                    if (!chunk_get(c, (ivec3){ x, y, z - 1 }))
+                    {
+                        chunk_face_at(c, pos, g_left, face);
+                        ARR_APPEND(verts, *n, face, n2, float);
+                    }
                 } break;
                 }
             }
