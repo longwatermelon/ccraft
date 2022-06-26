@@ -2,6 +2,7 @@
 #include <glad/glad.h>
 
 unsigned int g_vao, g_vb;
+size_t g_vb_size;
 
 struct World *world_alloc()
 {
@@ -72,7 +73,17 @@ void world_render_side(struct World *w, RenderInfo *ri, struct Chunk *c, int sid
     if (n)
     {
         glBindBuffer(GL_ARRAY_BUFFER, g_vb);
-        glBufferSubData(GL_ARRAY_BUFFER, 0, n * sizeof(float), verts);
+
+        if (n * sizeof(float) > g_vb_size)
+        {
+            glBufferData(GL_ARRAY_BUFFER, n * sizeof(float), verts, GL_DYNAMIC_DRAW);
+            g_vb_size = n * sizeof(float);
+        }
+        else
+        {
+            glBufferSubData(GL_ARRAY_BUFFER, 0, n * sizeof(float), verts);
+        }
+
         glBindBuffer(GL_ARRAY_BUFFER, 0);
 
         glBindVertexArray(g_vao);
@@ -112,7 +123,8 @@ void world_init_renderer()
 
     glGenBuffers(1, &g_vb);
     glBindBuffer(GL_ARRAY_BUFFER, g_vb);
-    glBufferData(GL_ARRAY_BUFFER, 16 * 256 * 48 * sizeof(float), 0, GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, 0, 0, GL_DYNAMIC_DRAW);
+    g_vb_size = 0;
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), 0);
     glEnableVertexAttribArray(0);

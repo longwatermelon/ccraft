@@ -100,8 +100,6 @@ struct Chunk *chunk_alloc(struct World *w, vec3 pos)
     c->highest_y = 0;
     chunk_find_highest(c);
 
-    printf("%d\n", c->highest_y);
-
     return c;
 }
 
