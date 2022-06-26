@@ -27,6 +27,7 @@ struct Chunk
 {
     vec3 pos;
     int grid[16][256][16];
+    int highest_y;
 
     struct World *world;
 };
@@ -38,10 +39,12 @@ void chunk_free(struct Chunk *c);
 /* void chunk_render_cube(struct Chunk *c, RenderInfo *ri, int x, int y, int z, struct CubeTexture *tex); */
 /* void chunk_render_face(struct Chunk *c, RenderInfo *ri, int x, int y, int z, float *face, struct Texture *tex); */
 
-float *chunk_visible_verts(struct Chunk *c, int side, size_t *n);
+float *chunk_visible_verts(struct Chunk *c, int side, struct Camera *cam, size_t *n);
 void chunk_face_at(struct Chunk *c, ivec3 pos, float *face, float dest[48]);
 
 int chunk_get(struct Chunk *c, ivec3 pos);
+
+void chunk_find_highest(struct Chunk *c);
 
 #endif
 

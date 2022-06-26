@@ -60,7 +60,7 @@ void world_render(struct World *w, RenderInfo *ri)
 void world_render_side(struct World *w, RenderInfo *ri, struct Chunk *c, int side)
 {
     size_t n;
-    float *verts = chunk_visible_verts(c, side, &n);
+    float *verts = chunk_visible_verts(c, side, ri->cam, &n);
 
     switch (side)
     {
@@ -69,13 +69,18 @@ void world_render_side(struct World *w, RenderInfo *ri, struct Chunk *c, int sid
     case SIDE_BOT: tex_bind(w->tex->bottom, 0); break;
     }
 
-    glBindBuffer(GL_ARRAY_BUFFER, g_vb);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, n * sizeof(float), verts);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    if (n)
+    {
+        glBindBuffer(GL_ARRAY_BUFFER, g_vb);
+        glBufferSubData(GL_ARRAY_BUFFER, 0, n * sizeof(float), verts);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-    glBindVertexArray(g_vao);
-    glDrawArrays(GL_TRIANGLES, 0, n / 8);
-    glBindVertexArray(0);
+        glBindVertexArray(g_vao);
+        glDrawArrays(GL_TRIANGLES, 0, n / 8);
+        glBindVertexArray(0);
+    }
+
+    free(verts);
 }
 
 
@@ -107,7 +112,6 @@ void world_init_renderer()
 
     glGenBuffers(1, &g_vb);
     glBindBuffer(GL_ARRAY_BUFFER, g_vb);
-    // Maximum buffer size (4 full sides)
     glBufferData(GL_ARRAY_BUFFER, 16 * 256 * 48 * sizeof(float), 0, GL_DYNAMIC_DRAW);
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), 0);

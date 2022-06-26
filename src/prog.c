@@ -1,6 +1,7 @@
 #include "prog.h"
 #include "chunk.h"
 #include "world.h"
+#include "util.h"
 #include <stb/stb_image.h>
 #include <stdlib.h>
 
@@ -10,7 +11,7 @@ struct Prog *prog_alloc(GLFWwindow *win)
     struct Prog *p = malloc(sizeof(struct Prog));
     p->win = win;
 
-    p->cam = cam_alloc((vec3){ 0.f, 0.f, 0.f }, (vec3){ 0.f, 0.f, 0.f });
+    p->cam = cam_alloc((vec3){ 0.f, 30.f, 0.f }, (vec3){ 0.f, 0.f, 0.f });
 
     p->ri = ri_alloc();
     ri_add_shader(p->ri, "shaders/basic_v.glsl", "shaders/basic_f.glsl");
@@ -78,15 +79,22 @@ void prog_mainloop(struct Prog *p)
 
 void prog_events(struct Prog *p)
 {
-    float move = .05f;
+    float move = .1f;
 
-    vec3 front;
-    glm_vec3_scale(p->cam->front, move, front);
-    front[1] = 0.f;
+    vec3 angle;
+    glm_vec3_copy(p->cam->rot, angle);
+    angle[1] = 0.f;
 
-    vec3 right;
-    glm_vec3_scale(p->cam->right, move, right);
-    right[1] = 0.f;
+    vec4 quat;
+    util_quat_from_rot(angle, quat);
+
+    vec3 front = { 1.f, 0.f, 0.f };
+    vec3 right = { 0.f, 0.f, 1.f };
+    glm_quat_rotatev(quat, front, front);
+    glm_quat_rotatev(quat, right, right);
+
+    glm_vec3_scale(front, move, front);
+    glm_vec3_scale(right, move, right);
 
     if (glfwGetKey(p->win, GLFW_KEY_W) == GLFW_PRESS) glm_vec3_add(p->cam->pos, front, p->cam->pos);
     if (glfwGetKey(p->win, GLFW_KEY_S) == GLFW_PRESS) glm_vec3_sub(p->cam->pos, front, p->cam->pos);

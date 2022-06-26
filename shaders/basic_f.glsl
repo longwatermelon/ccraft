@@ -13,6 +13,7 @@ void main()
 
     if (Normal.x != 0) shading = shading * 0.9;
     if (Normal.z != 0) shading = shading * 0.7;
+    if (Normal.y < 0) shading = shading * 0.5;
 
     FragColor = texture(tex, TexCoords) * vec4(shading, 1.0);
     /* FragColor = vec4(1.0); */

@@ -1,9 +1,12 @@
 #include "prog.h"
 #include "world.h"
+#include <time.h>
 
 
 int main()
 {
+    srand(time(0));
+
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);

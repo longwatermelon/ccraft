@@ -91,10 +91,16 @@ struct Chunk *chunk_alloc(struct World *w, vec3 pos)
         {
             for (int z = 0; z < 16; ++z)
             {
-                c->grid[x][y][z] = y < 10 ? 1 : 0;
+                /* c->grid[x][y][z] = 1 ? (y < 30 ? 1 : 0) : 0; */
+                c->grid[x][y][z] = x % 2 == 0 && z % 2 == 0 && y < 30 ? 1 : 0;
             }
         }
     }
+
+    c->highest_y = 0;
+    chunk_find_highest(c);
+
+    printf("%d\n", c->highest_y);
 
     return c;
 }
@@ -106,16 +112,18 @@ void chunk_free(struct Chunk *c)
 }
 
 
-float *chunk_visible_verts(struct Chunk *c, int side, size_t *n)
+float *chunk_visible_verts(struct Chunk *c, int side, struct Camera *cam, size_t *n)
 {
     float *verts = 0;
     *n = 0;
 
     size_t n2 = sizeof(g_top) / sizeof(float);
+    vec3 cpos;
+    glm_vec3_sub(cam->pos, c->pos, cpos);
 
     for (int x = 0; x < 16; ++x)
     {
-        for (int y = 0; y < 256; ++y)
+        for (int y = 0; y <= c->highest_y; ++y)
         {
             for (int z = 0; z < 16; ++z)
             {
@@ -128,43 +136,61 @@ float *chunk_visible_verts(struct Chunk *c, int side, size_t *n)
                 switch (side)
                 {
                 case SIDE_TOP:
-                    if (!chunk_get(c, (ivec3){ x, y + 1, z }))
+                    if (y < cpos[1])
                     {
-                        chunk_face_at(c, pos, g_top, face);
-                        ARR_APPEND(verts, *n, face, n2, float);
+                        if (!chunk_get(c, (ivec3){ x, y + 1, z }))
+                        {
+                            chunk_face_at(c, pos, g_top, face);
+                            ARR_APPEND(verts, *n, face, n2, float);
+                        }
                     }
                     break;
                 case SIDE_BOT:
-                    if (!chunk_get(c, (ivec3){ x, y - 1, z }))
+                    if (y > cpos[1])
                     {
-                        chunk_face_at(c, pos, g_bottom, face);
-                        ARR_APPEND(verts, *n, face, n2, float);
+                        if (!chunk_get(c, (ivec3){ x, y - 1, z }))
+                        {
+                            chunk_face_at(c, pos, g_bottom, face);
+                            ARR_APPEND(verts, *n, face, n2, float);
+                        }
                     }
                     break;
                 case SIDE_SIDE:
                 {
-                    if (!chunk_get(c, (ivec3){ x + 1, y, z }))
+                    if (x < cpos[0])
                     {
-                        chunk_face_at(c, pos, g_back, face);
-                        ARR_APPEND(verts, *n, face, n2, float);
+                        if (!chunk_get(c, (ivec3){ x + 1, y, z }))
+                        {
+                            chunk_face_at(c, pos, g_back, face);
+                            ARR_APPEND(verts, *n, face, n2, float);
+                        }
                     }
 
-                    if (!chunk_get(c, (ivec3){ x - 1, y, z }))
+                    if (x > cpos[0])
                     {
-                        chunk_face_at(c, pos, g_front, face);
-                        ARR_APPEND(verts, *n, face, n2, float);
+                        if (!chunk_get(c, (ivec3){ x - 1, y, z }))
+                        {
+                            chunk_face_at(c, pos, g_front, face);
+                            ARR_APPEND(verts, *n, face, n2, float);
+                        }
                     }
 
-                    if (!chunk_get(c, (ivec3){ x, y, z + 1 }))
+                    if (z < cpos[2])
                     {
-                        chunk_face_at(c, pos, g_right, face);
-                        ARR_APPEND(verts, *n, face, n2, float);
+                        if (!chunk_get(c, (ivec3){ x, y, z + 1 }))
+                        {
+                            chunk_face_at(c, pos, g_right, face);
+                            ARR_APPEND(verts, *n, face, n2, float);
+                        }
                     }
 
-                    if (!chunk_get(c, (ivec3){ x, y, z - 1 }))
+                    if (z > cpos[2])
                     {
-                        chunk_face_at(c, pos, g_left, face);
-                        ARR_APPEND(verts, *n, face, n2, float);
+                        if (!chunk_get(c, (ivec3){ x, y, z - 1 }))
+                        {
+                            chunk_face_at(c, pos, g_left, face);
+                            ARR_APPEND(verts, *n, face, n2, float);
+                        }
                     }
                 } break;
                 }
@@ -219,5 +245,24 @@ int chunk_get(struct Chunk *c, ivec3 pos)
     }
 
     return c->grid[pos[0]][pos[1]][pos[2]];
+}
+
+
+void chunk_find_highest(struct Chunk *c)
+{
+    for (int y = 255; y >= 0; --y)
+    {
+        for (int x = 0; x < 16; ++x)
+        {
+            for (int z = 0; z < 16; ++z)
+            {
+                if (c->grid[x][y][z] && y > c->highest_y)
+                {
+                    c->highest_y = y;
+                    return;
+                }
+            }
+        }
+    }
 }
 
