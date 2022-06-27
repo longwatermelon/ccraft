@@ -4,7 +4,7 @@
 #include "chunk.h"
 #include "render.h"
 
-#define RENDER_DISTANCE 6
+#define RENDER_DISTANCE 10
 
 struct World
 {
@@ -14,6 +14,9 @@ struct World
     size_t ntexs;
 
     struct Texture *atlas;
+
+    float *vertbuffer;
+    size_t vertbuffer_size;
 };
 
 struct World *world_alloc();

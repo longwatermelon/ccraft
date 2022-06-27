@@ -25,6 +25,9 @@ struct World *world_alloc()
 
     w->atlas = tex_alloc("res/atlas.png");
 
+    w->vertbuffer_size = 48000;
+    w->vertbuffer = malloc(sizeof(float) * w->vertbuffer_size);
+
     return w;
 }
 
@@ -37,6 +40,8 @@ void world_free(struct World *w)
     free(w->texs);
 
     tex_free(w->atlas);
+
+    free(w->vertbuffer);
 
     free(w);
 }
@@ -70,8 +75,7 @@ void world_render(struct World *w, RenderInfo *ri)
 
 void world_render_side(struct World *w, RenderInfo *ri, struct Chunk *c, int side)
 {
-    size_t n;
-    float *verts = chunk_visible_verts(c, side, ri->cam, &n);
+    size_t n = chunk_visible_verts(c, side, ri->cam, &w->vertbuffer, &w->vertbuffer_size);
 
     if (n)
     {
@@ -79,12 +83,12 @@ void world_render_side(struct World *w, RenderInfo *ri, struct Chunk *c, int sid
 
         if (n * sizeof(float) > g_vb_size)
         {
-            glBufferData(GL_ARRAY_BUFFER, n * sizeof(float), verts, GL_DYNAMIC_DRAW);
+            glBufferData(GL_ARRAY_BUFFER, n * sizeof(float), w->vertbuffer, GL_DYNAMIC_DRAW);
             g_vb_size = n * sizeof(float);
         }
         else
         {
-            glBufferSubData(GL_ARRAY_BUFFER, 0, n * sizeof(float), verts);
+            glBufferSubData(GL_ARRAY_BUFFER, 0, n * sizeof(float), w->vertbuffer);
         }
 
         glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -93,8 +97,6 @@ void world_render_side(struct World *w, RenderInfo *ri, struct Chunk *c, int sid
         glDrawArrays(GL_TRIANGLES, 0, n / 8);
         glBindVertexArray(0);
     }
-
-    free(verts);
 }
 
 
