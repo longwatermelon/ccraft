@@ -21,7 +21,8 @@ struct World *world_alloc()
         }
     }
 
-    w->tex = ct_alloc("res/cube/top.png", "res/cube/bottom.png", "res/cube/side.png");
+    w->tex = ct_alloc((vec2){ 0.f, 0.f }, (vec2){ 32.f, 0.f }, (vec3){ 16.f, 0.f });
+    w->atlas = tex_alloc("res/atlas.png");
 
     return w;
 }
@@ -30,6 +31,7 @@ struct World *world_alloc()
 void world_free(struct World *w)
 {
     ct_free(w->tex);
+    tex_free(w->atlas);
 
     for (size_t i = 0; i < w->nchunks; ++i)
         chunk_free(w->chunks[i]);
@@ -44,6 +46,8 @@ void world_render(struct World *w, RenderInfo *ri)
     mat4 model;
     shader_mat4(ri->shader, "view", ri->view);
     shader_mat4(ri->shader, "projection", ri->proj);
+
+    tex_bind(w->atlas, 0);
 
     for (size_t i = 0; i < w->nchunks; ++i)
     {
@@ -61,14 +65,7 @@ void world_render(struct World *w, RenderInfo *ri)
 void world_render_side(struct World *w, RenderInfo *ri, struct Chunk *c, int side)
 {
     size_t n;
-    float *verts = chunk_visible_verts(c, side, ri->cam, &n);
-
-    switch (side)
-    {
-    case SIDE_TOP: tex_bind(w->tex->top, 0); break;
-    case SIDE_SIDE: tex_bind(w->tex->side, 0); break;
-    case SIDE_BOT: tex_bind(w->tex->bottom, 0); break;
-    }
+    float *verts = chunk_visible_verts(c, side, ri->cam, w->tex, &n);
 
     if (n)
     {

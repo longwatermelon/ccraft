@@ -10,6 +10,7 @@ struct World
     size_t nchunks;
 
     struct CubeTexture *tex;
+    struct Texture *atlas;
 };
 
 struct World *world_alloc();
