@@ -21,9 +21,10 @@ struct World *world_alloc()
         }
     }
 
-    w->ntexs = 1;
+    w->ntexs = 2;
     w->texs = malloc(sizeof(struct CubeTexture*) * w->ntexs);
     w->texs[0] = ct_alloc((vec2){ 0.f, 0.f }, (vec2){ 200.f, 0.f }, (vec3){ 100.f, 0.f });
+    w->texs[1] = ct_alloc((vec2){ 200.f, 0.f }, (vec2){ 200.f, 0.f }, (vec2){ 200.f, 0.f });
 
     w->atlas = tex_alloc("res/atlas.png");
 

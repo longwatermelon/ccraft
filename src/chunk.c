@@ -97,7 +97,7 @@ struct Chunk *chunk_alloc(struct World *w, vec3 pos)
             for (int z = 0; z < 16; ++z)
             {
                 /* c->grid[x][y][z] = 1 ? (y < 30 ? 1 : 0) : 0; */
-                c->grid[x][y][z] = x % 2 == 0 && z % 2 == 0 && y < 30 ? 1 : 0;
+                c->grid[x][y][z] = x % 2 == 0 && z % 2 == 0 && y < 30 ? (y == 29 ? BLOCK_GRASS : BLOCK_DIRT) : BLOCK_AIR;
             }
         }
     }
@@ -211,9 +211,6 @@ void chunk_face_at(struct Chunk *c, ivec3 pos, float *face, float dest[48])
 
     int block = c->grid[pos[0]][pos[1]][pos[2]];
     struct CubeTexture *tex = world_get_tex(c->world, block);
-
-    if (!tex)
-        return;
 
     vec2 texcoords[3];
     ct_normalize(tex, texcoords);

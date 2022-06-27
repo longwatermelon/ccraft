@@ -18,7 +18,8 @@ enum
 enum
 {
     BLOCK_AIR,
-    BLOCK_GRASS
+    BLOCK_GRASS,
+    BLOCK_DIRT
 };
 
 struct CubeTexture
