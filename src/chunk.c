@@ -4,6 +4,7 @@
 #include "world.h"
 #include <string.h>
 #include <glad/glad.h>
+#include <noise/noise.h>
 
 float g_left[] = {
      0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
@@ -82,6 +83,15 @@ struct Chunk *chunk_alloc(struct World *w, vec3 pos)
     glm_vec3_copy(pos, c->pos);
     c->world = w;
 
+    for (int x = 0; x < 16; ++x)
+    {
+        for (int z = 0; z < 16; ++z)
+        {
+            float res = simplex2((c->pos[0] + x) * .01f, (c->pos[2] + z) * .01f, 6, .5f, 2.f);
+            c->heightmap[x][z] = res * 15.f;
+        }
+    }
+
     for (int y = 0; y < 256; ++y)
     {
         for (int x = 0; x < 16; ++x)
@@ -89,7 +99,11 @@ struct Chunk *chunk_alloc(struct World *w, vec3 pos)
             for (int z = 0; z < 16; ++z)
             {
                 /* c->grid[x][y][z] = 1 ? (y < 30 ? 1 : 0) : 0; */
-                c->grid[x][y][z] = x % 2 == 0 && y < 15 ? (y == 14 ? BLOCK_GRASS : BLOCK_DIRT) : BLOCK_AIR;
+                /* c->grid[x][y][z] = x % 2 == 0 && y < 15 ? (y == 14 ? BLOCK_GRASS : BLOCK_DIRT) : BLOCK_AIR; */
+                if (y < c->heightmap[x][z])
+                    c->grid[x][y][z] = BLOCK_GRASS;
+                else
+                    c->grid[x][y][z] = BLOCK_AIR;
             }
         }
 
@@ -99,7 +113,7 @@ struct Chunk *chunk_alloc(struct World *w, vec3 pos)
         c->border_cache[1][y][1] = -1;
     }
 
-    chunk_find_highest(c);
+    /* chunk_find_highest(c); */
 
     return c;
 }

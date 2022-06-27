@@ -1,11 +1,13 @@
 #include "prog.h"
 #include "world.h"
 #include <time.h>
+#include <noise/noise.h>
 
 
 int main()
 {
     srand(time(0));
+    seed(time(0));
 
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
