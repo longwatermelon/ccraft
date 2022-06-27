@@ -21,7 +21,10 @@ struct World *world_alloc()
         }
     }
 
-    w->tex = ct_alloc((vec2){ 0.f, 0.f }, (vec2){ 200.f, 0.f }, (vec3){ 100.f, 0.f });
+    w->ntexs = 1;
+    w->texs = malloc(sizeof(struct CubeTexture*) * w->ntexs);
+    w->texs[0] = ct_alloc((vec2){ 0.f, 0.f }, (vec2){ 200.f, 0.f }, (vec3){ 100.f, 0.f });
+
     w->atlas = tex_alloc("res/atlas.png");
 
     return w;
@@ -30,7 +33,11 @@ struct World *world_alloc()
 
 void world_free(struct World *w)
 {
-    ct_free(w->tex);
+    for (size_t i = 0; i < w->ntexs; ++i)
+        ct_free(w->texs[i]);
+
+    free(w->texs);
+
     tex_free(w->atlas);
 
     for (size_t i = 0; i < w->nchunks; ++i)
@@ -65,7 +72,7 @@ void world_render(struct World *w, RenderInfo *ri)
 void world_render_side(struct World *w, RenderInfo *ri, struct Chunk *c, int side)
 {
     size_t n;
-    float *verts = chunk_visible_verts(c, side, ri->cam, w->tex, &n);
+    float *verts = chunk_visible_verts(c, side, ri->cam, &n);
 
     if (n)
     {
@@ -110,6 +117,15 @@ struct Chunk *world_adjacent_chunk(struct World *w, struct Chunk *c, vec3 dir)
     }
 
     return 0;
+}
+
+
+struct CubeTexture *world_get_tex(struct World *w, int block)
+{
+    if (block == 0)
+        return 0;
+
+    return w->texs[block - 1];
 }
 
 

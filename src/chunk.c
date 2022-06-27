@@ -115,7 +115,7 @@ void chunk_free(struct Chunk *c)
 }
 
 
-float *chunk_visible_verts(struct Chunk *c, int side, struct Camera *cam, struct CubeTexture *tex, size_t *n)
+float *chunk_visible_verts(struct Chunk *c, int side, struct Camera *cam, size_t *n)
 {
     float *verts = 0;
     *n = 0;
@@ -143,7 +143,7 @@ float *chunk_visible_verts(struct Chunk *c, int side, struct Camera *cam, struct
                     {
                         if (!chunk_get(c, (ivec3){ x, y + 1, z }))
                         {
-                            chunk_face_at(c, pos, g_top, tex, face);
+                            chunk_face_at(c, pos, g_top, face);
                             ARR_APPEND(verts, *n, face, n2, float);
                         }
                     }
@@ -153,7 +153,7 @@ float *chunk_visible_verts(struct Chunk *c, int side, struct Camera *cam, struct
                     {
                         if (!chunk_get(c, (ivec3){ x, y - 1, z }))
                         {
-                            chunk_face_at(c, pos, g_bottom, tex, face);
+                            chunk_face_at(c, pos, g_bottom, face);
                             ARR_APPEND(verts, *n, face, n2, float);
                         }
                     }
@@ -164,7 +164,7 @@ float *chunk_visible_verts(struct Chunk *c, int side, struct Camera *cam, struct
                     {
                         if (!chunk_get(c, (ivec3){ x + 1, y, z }))
                         {
-                            chunk_face_at(c, pos, g_back, tex, face);
+                            chunk_face_at(c, pos, g_back, face);
                             ARR_APPEND(verts, *n, face, n2, float);
                         }
                     }
@@ -173,7 +173,7 @@ float *chunk_visible_verts(struct Chunk *c, int side, struct Camera *cam, struct
                     {
                         if (!chunk_get(c, (ivec3){ x - 1, y, z }))
                         {
-                            chunk_face_at(c, pos, g_front, tex, face);
+                            chunk_face_at(c, pos, g_front, face);
                             ARR_APPEND(verts, *n, face, n2, float);
                         }
                     }
@@ -182,7 +182,7 @@ float *chunk_visible_verts(struct Chunk *c, int side, struct Camera *cam, struct
                     {
                         if (!chunk_get(c, (ivec3){ x, y, z + 1 }))
                         {
-                            chunk_face_at(c, pos, g_right, tex, face);
+                            chunk_face_at(c, pos, g_right, face);
                             ARR_APPEND(verts, *n, face, n2, float);
                         }
                     }
@@ -191,7 +191,7 @@ float *chunk_visible_verts(struct Chunk *c, int side, struct Camera *cam, struct
                     {
                         if (!chunk_get(c, (ivec3){ x, y, z - 1 }))
                         {
-                            chunk_face_at(c, pos, g_left, tex, face);
+                            chunk_face_at(c, pos, g_left, face);
                             ARR_APPEND(verts, *n, face, n2, float);
                         }
                     }
@@ -205,9 +205,15 @@ float *chunk_visible_verts(struct Chunk *c, int side, struct Camera *cam, struct
 }
 
 
-void chunk_face_at(struct Chunk *c, ivec3 pos, float *face, struct CubeTexture *tex, float dest[48])
+void chunk_face_at(struct Chunk *c, ivec3 pos, float *face, float dest[48])
 {
     memcpy(dest, face, 48 * sizeof(float));
+
+    int block = c->grid[pos[0]][pos[1]][pos[2]];
+    struct CubeTexture *tex = world_get_tex(c->world, block);
+
+    if (!tex)
+        return;
 
     vec2 texcoords[3];
     ct_normalize(tex, texcoords);

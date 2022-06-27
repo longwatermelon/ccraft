@@ -9,7 +9,9 @@ struct World
     struct Chunk **chunks;
     size_t nchunks;
 
-    struct CubeTexture *tex;
+    struct CubeTexture **texs;
+    size_t ntexs;
+
     struct Texture *atlas;
 };
 
@@ -20,6 +22,8 @@ void world_render(struct World *w, RenderInfo *ri);
 void world_render_side(struct World *w, RenderInfo *ri, struct Chunk *c, int side);
 
 struct Chunk *world_adjacent_chunk(struct World *w, struct Chunk *c, vec3 dir);
+
+struct CubeTexture *world_get_tex(struct World *w, int block);
 
 void world_init_renderer();
 
