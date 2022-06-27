@@ -82,9 +82,9 @@ struct Chunk *chunk_alloc(struct World *w, vec3 pos)
     glm_vec3_copy(pos, c->pos);
     c->world = w;
 
-    for (int x = 0; x < 16; ++x)
+    for (int y = 0; y < 256; ++y)
     {
-        for (int y = 0; y < 256; ++y)
+        for (int x = 0; x < 16; ++x)
         {
             for (int z = 0; z < 16; ++z)
             {
@@ -92,6 +92,11 @@ struct Chunk *chunk_alloc(struct World *w, vec3 pos)
                 c->grid[x][y][z] = x % 2 == 0 && y < 15 ? (y == 14 ? BLOCK_GRASS : BLOCK_DIRT) : BLOCK_AIR;
             }
         }
+
+        c->border_cache[0][y][0] = -1;
+        c->border_cache[0][y][1] = -1;
+        c->border_cache[1][y][0] = -1;
+        c->border_cache[1][y][1] = -1;
     }
 
     chunk_find_highest(c);
@@ -236,22 +241,33 @@ int chunk_get(struct Chunk *c, ivec3 pos)
 
     if (x || z)
     {
-        int sigx = x ? (pos[0] < 0 ? -1 : 1) : 0;
-        int sigz = z ? (pos[2] < 0 ? -1 : 1) : 0;
+        ivec2 iborder = {
+            pos[0] < 0 ? 0 : 1,
+            pos[2] < 0 ? 0 : 1
+        };
 
-        vec3 dir = { sigx, 0.f, sigz };
-        struct Chunk *adjacent = world_adjacent_chunk(c->world, c, dir);
-
-        if (adjacent)
-        {
-            int ix = x ? (pos[0] - 16 + (sigx < 0 ? 32 : 0)) : pos[0];
-            int iz = z ? (pos[2] - 16 + (sigz < 0 ? 32 : 0)) : pos[2];
-
-            return adjacent->grid[ix][pos[1]][iz];
-        }
+        if (c->border_cache[iborder[0]][pos[1]][iborder[1]] != -1)
+            return c->border_cache[iborder[0]][pos[1]][iborder[1]];
         else
         {
-            return 0;
+            int sigx = x ? (pos[0] < 0 ? -1 : 1) : 0;
+            int sigz = z ? (pos[2] < 0 ? -1 : 1) : 0;
+
+            vec3 dir = { sigx, 0.f, sigz };
+            struct Chunk *adjacent = world_adjacent_chunk(c->world, c, dir);
+
+            if (adjacent)
+            {
+                int ix = x ? (pos[0] - 16 + (sigx < 0 ? 32 : 0)) : pos[0];
+                int iz = z ? (pos[2] - 16 + (sigz < 0 ? 32 : 0)) : pos[2];
+
+                c->border_cache[x][pos[1]][z] = adjacent->grid[iborder[0]][pos[1]][iborder[1]];
+                return adjacent->grid[ix][pos[1]][iz];
+            }
+            else
+            {
+                return 0;
+            }
         }
     }
 

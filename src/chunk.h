@@ -35,6 +35,7 @@ struct Chunk
     vec3 pos;
     int grid[16][256][16];
     int heightmap[16][16];
+    int border_cache[2][256][2];
 
     struct World *world;
 };
