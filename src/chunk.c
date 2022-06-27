@@ -87,8 +87,8 @@ struct Chunk *chunk_alloc(struct World *w, vec3 pos)
     {
         for (int z = 0; z < 16; ++z)
         {
-            float res = simplex2((c->pos[0] + x) * .01f, (c->pos[2] + z) * .01f, 6, .5f, 2.f);
-            c->heightmap[x][z] = res * 15.f;
+            float res = simplex2((c->pos[0] + x) * .01f, (c->pos[2] + z) * .01f, 8, .6f, 1.f);
+            c->heightmap[x][z] = res * 25.f;
         }
     }
 
@@ -98,22 +98,13 @@ struct Chunk *chunk_alloc(struct World *w, vec3 pos)
         {
             for (int z = 0; z < 16; ++z)
             {
-                /* c->grid[x][y][z] = 1 ? (y < 30 ? 1 : 0) : 0; */
-                /* c->grid[x][y][z] = x % 2 == 0 && y < 15 ? (y == 14 ? BLOCK_GRASS : BLOCK_DIRT) : BLOCK_AIR; */
                 if (y < c->heightmap[x][z])
                     c->grid[x][y][z] = BLOCK_GRASS;
                 else
                     c->grid[x][y][z] = BLOCK_AIR;
             }
         }
-
-        c->border_cache[0][y][0] = -1;
-        c->border_cache[0][y][1] = -1;
-        c->border_cache[1][y][0] = -1;
-        c->border_cache[1][y][1] = -1;
     }
-
-    /* chunk_find_highest(c); */
 
     return c;
 }
@@ -136,11 +127,8 @@ size_t chunk_visible_verts(struct Chunk *c, int side, struct Camera *cam, float 
     {
         for (int z = 0; z < 16; ++z)
         {
-            for (int y = 0; y <= c->heightmap[x][z]; ++y)
+            for (int y = 0; y < c->heightmap[x][z]; ++y)
             {
-                if (!chunk_get(c, (ivec3){ x, y, z }))
-                    continue;
-
                 ivec3 pos = { x, y, z };
 
                 switch (side)
@@ -234,43 +222,36 @@ void chunk_face_at(struct Chunk *c, ivec3 pos, float **verts, size_t *nverts, si
 
 int chunk_get(struct Chunk *c, ivec3 pos)
 {
-    if (pos[1] < 0 || pos[1] >= 256)
+    /* if (pos[1] < 0 || pos[1] >= 256) */
+    /*     return 0; */
+
+/*     bool x = pos[0] < 0 || pos[0] >= 16; */
+/*     bool z = pos[2] < 0 || pos[2] >= 16; */
+
+
+/*     if (x || z) */
+/*     { */
+/*         int sigx = x ? (pos[0] < 0 ? -1 : 1) : 0; */
+/*         int sigz = z ? (pos[2] < 0 ? -1 : 1) : 0; */
+
+/*         vec3 dir = { sigx, 0.f, sigz }; */
+/*         struct Chunk *adjacent = world_adjacent_chunk(c->world, c, dir); */
+
+/*         if (adjacent) */
+/*         { */
+/*             int ix = x ? (pos[0] - sigx * 16) : pos[0]; */
+/*             int iz = z ? (pos[2] - sigz * 16) : pos[2]; */
+
+/*             return adjacent->grid[ix][pos[1]][iz]; */
+/*         } */
+/*         else */
+/*         { */
+/*             return 0; */
+/*         } */
+/*     } */
+
+    if (pos[0] < 0 || pos[0] > 15 || pos[1] < 0 || pos[1] > 255 || pos[2] < 0 || pos[2] > 15)
         return 0;
-
-    bool x = pos[0] < 0 || pos[0] >= 16;
-    bool z = pos[2] < 0 || pos[2] >= 16;
-
-    if (x || z)
-    {
-        ivec2 iborder = {
-            pos[0] < 0 ? 0 : 1,
-            pos[2] < 0 ? 0 : 1
-        };
-
-        if (c->border_cache[iborder[0]][pos[1]][iborder[1]] != -1)
-            return c->border_cache[iborder[0]][pos[1]][iborder[1]];
-        else
-        {
-            int sigx = x ? (pos[0] < 0 ? -1 : 1) : 0;
-            int sigz = z ? (pos[2] < 0 ? -1 : 1) : 0;
-
-            vec3 dir = { sigx, 0.f, sigz };
-            struct Chunk *adjacent = world_adjacent_chunk(c->world, c, dir);
-
-            if (adjacent)
-            {
-                int ix = x ? (pos[0] - 16 + (sigx < 0 ? 32 : 0)) : pos[0];
-                int iz = z ? (pos[2] - 16 + (sigz < 0 ? 32 : 0)) : pos[2];
-
-                c->border_cache[x][pos[1]][z] = adjacent->grid[iborder[0]][pos[1]][iborder[1]];
-                return adjacent->grid[ix][pos[1]][iz];
-            }
-            else
-            {
-                return 0;
-            }
-        }
-    }
 
     return c->grid[pos[0]][pos[1]][pos[2]];
 }

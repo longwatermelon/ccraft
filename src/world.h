@@ -4,7 +4,7 @@
 #include "chunk.h"
 #include "render.h"
 
-#define RENDER_DISTANCE 6
+#define RENDER_DISTANCE 10
 
 struct World
 {
