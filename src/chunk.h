@@ -37,7 +37,7 @@ struct Chunk
 {
     vec3 pos;
     int grid[16][256][16];
-    int highest_y;
+    int heightmap[16][16];
 
     struct World *world;
 };

@@ -97,12 +97,11 @@ struct Chunk *chunk_alloc(struct World *w, vec3 pos)
             for (int z = 0; z < 16; ++z)
             {
                 /* c->grid[x][y][z] = 1 ? (y < 30 ? 1 : 0) : 0; */
-                c->grid[x][y][z] = y < 15 ? (y == 14 ? BLOCK_GRASS : BLOCK_DIRT) : BLOCK_AIR;
+                c->grid[x][y][z] = x % 2 == 0 && z % 2 == 0 && y < 15 ? (y == 14 ? BLOCK_GRASS : BLOCK_DIRT) : BLOCK_AIR;
             }
         }
     }
 
-    c->highest_y = 0;
     chunk_find_highest(c);
 
     return c;
@@ -126,9 +125,9 @@ float *chunk_visible_verts(struct Chunk *c, int side, struct Camera *cam, size_t
 
     for (int x = 0; x < 16; ++x)
     {
-        for (int y = 0; y <= c->highest_y; ++y)
+        for (int z = 0; z < 16; ++z)
         {
-            for (int z = 0; z < 16; ++z)
+            for (int y = 0; y <= c->heightmap[x][z]; ++y)
             {
                 if (!chunk_get(c, (ivec3){ x, y, z }))
                     continue;
@@ -270,17 +269,22 @@ int chunk_get(struct Chunk *c, ivec3 pos)
 
 void chunk_find_highest(struct Chunk *c)
 {
+    for (int x = 0; x < 16; ++x)
+    {
+        for (int z = 0; z < 16; ++z)
+        {
+            c->heightmap[x][z] = 0;
+        }
+    }
+
     for (int y = 255; y >= 0; --y)
     {
         for (int x = 0; x < 16; ++x)
         {
             for (int z = 0; z < 16; ++z)
             {
-                if (c->grid[x][y][z] && y > c->highest_y)
-                {
-                    c->highest_y = y;
-                    return;
-                }
+                if (c->grid[x][y][z] && y > c->heightmap[x][z])
+                    c->heightmap[x][z] = y;
             }
         }
     }
