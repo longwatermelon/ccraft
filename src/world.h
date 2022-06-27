@@ -4,10 +4,11 @@
 #include "chunk.h"
 #include "render.h"
 
+#define RENDER_DISTANCE 6
+
 struct World
 {
-    struct Chunk **chunks;
-    size_t nchunks;
+    struct Chunk *chunks[RENDER_DISTANCE][RENDER_DISTANCE];
 
     struct CubeTexture **texs;
     size_t ntexs;

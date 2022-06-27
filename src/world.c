@@ -8,16 +8,13 @@ struct World *world_alloc()
 {
     struct World *w = malloc(sizeof(struct World));
 
-    w->nchunks = 36;
-    w->chunks = malloc(sizeof(struct Chunk*) * w->nchunks);
+    int i = RENDER_DISTANCE / 2 * 16;
 
-    size_t idx = 0;
-
-    for (int x = -48; x < 48; x += 16)
+    for (int x = -i; x < i; x += 16)
     {
-        for (int z = -48; z < 48; z += 16)
+        for (int z = -i; z < i; z += 16)
         {
-            w->chunks[idx++] = chunk_alloc(w, (vec3){ x, 0.f, z });
+            w->chunks[(x + i) / 16][(z + i) / 16] = chunk_alloc(w, (vec3){ x, 0.f, z });
         }
     }
 
@@ -41,10 +38,6 @@ void world_free(struct World *w)
 
     tex_free(w->atlas);
 
-    for (size_t i = 0; i < w->nchunks; ++i)
-        chunk_free(w->chunks[i]);
-
-    free(w->chunks);
     free(w);
 }
 
@@ -57,15 +50,20 @@ void world_render(struct World *w, RenderInfo *ri)
 
     tex_bind(w->atlas, 0);
 
-    for (size_t i = 0; i < w->nchunks; ++i)
+    for (int x = 0; x < RENDER_DISTANCE; ++x)
     {
-        glm_mat4_identity(model);
-        glm_translate(model, w->chunks[i]->pos);
-        shader_mat4(ri->shader, "model", model);
+        for (int z = 0; z < RENDER_DISTANCE; ++z)
+        {
+            struct Chunk *chunk = w->chunks[x][z];
 
-        world_render_side(w, ri, w->chunks[i], SIDE_TOP);
-        world_render_side(w, ri, w->chunks[i], SIDE_SIDE);
-        world_render_side(w, ri, w->chunks[i], SIDE_BOT);
+            glm_mat4_identity(model);
+            glm_translate(model, chunk->pos);
+            shader_mat4(ri->shader, "model", model);
+
+            world_render_side(w, ri, chunk, SIDE_TOP);
+            world_render_side(w, ri, chunk, SIDE_SIDE);
+            world_render_side(w, ri, chunk, SIDE_BOT);
+        }
     }
 }
 
@@ -102,22 +100,35 @@ void world_render_side(struct World *w, RenderInfo *ri, struct Chunk *c, int sid
 
 struct Chunk *world_adjacent_chunk(struct World *w, struct Chunk *c, vec3 dir)
 {
-    vec3 offset;
-    glm_vec3_scale(dir, 16.f, offset);
+    ivec2 idx = {
+        (c->pos[0] - w->chunks[0][0]->pos[0]) / 16.f,
+        (c->pos[2] - w->chunks[0][0]->pos[2]) / 16.f
+    };
 
-    vec3 target;
-    glm_vec3_add(c->pos, offset, target);
+    int ix = idx[0] + dir[0];
+    int iz = idx[1] + dir[2];
 
-    for (size_t i = 0; i < w->nchunks; ++i)
-    {
-        // Ignore y component
-        target[1] = w->chunks[i]->pos[1];
+    if (ix < 0 || ix >= RENDER_DISTANCE || iz < 0 || iz >= RENDER_DISTANCE)
+        return 0;
 
-        if (glm_vec3_distance(target, w->chunks[i]->pos) < 1.f)
-            return w->chunks[i];
-    }
+    return w->chunks[idx[0] + (int)dir[0]][idx[1] + (int)dir[2]];
 
-    return 0;
+    /* vec3 offset; */
+    /* glm_vec3_scale(dir, 16.f, offset); */
+
+    /* vec3 target; */
+    /* glm_vec3_add(c->pos, offset, target); */
+
+    /* for (size_t i = 0; i < w->nchunks; ++i) */
+    /* { */
+    /*     // Ignore y component */
+    /*     target[1] = w->chunks[i]->pos[1]; */
+
+    /*     if (glm_vec3_distance(target, w->chunks[i]->pos) < 1.f) */
+    /*         return w->chunks[i]; */
+    /* } */
+
+    /* return 0; */
 }
 
 

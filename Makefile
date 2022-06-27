@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-std=gnu17 -ggdb -Wall -Werror
+CFLAGS=-std=gnu17 -ggdb -Wall -pg
 INC=-Ideps/include
 LIBS=-Ldeps/lib -lglfw -lcglm -lm -lglad -lstb_image -lassimp
 

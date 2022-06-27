@@ -30,9 +30,6 @@ struct CubeTexture
 struct CubeTexture *ct_alloc(vec2 top, vec2 bottom, vec2 side);
 void ct_free(struct CubeTexture *ct);
 
-// Top, bottom, side
-void ct_normalize(struct CubeTexture *ct, vec2 textures[3]);
-
 struct Chunk
 {
     vec3 pos;
