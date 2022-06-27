@@ -21,7 +21,7 @@ struct World *world_alloc()
         }
     }
 
-    w->tex = ct_alloc((vec2){ 0.f, 0.f }, (vec2){ 32.f, 0.f }, (vec3){ 16.f, 0.f });
+    w->tex = ct_alloc((vec2){ 0.f, 0.f }, (vec2){ 200.f, 0.f }, (vec3){ 100.f, 0.f });
     w->atlas = tex_alloc("res/atlas.png");
 
     return w;

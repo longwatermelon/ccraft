@@ -78,9 +78,9 @@ void ct_free(struct CubeTexture *ct)
 
 void ct_normalize(struct CubeTexture *ct, vec2 textures[3])
 {
-    glm_vec2_divs(ct->top, 80.f, textures[0]);
-    glm_vec2_divs(ct->bottom, 80.f, textures[1]);
-    glm_vec2_divs(ct->side, 80.f, textures[2]);
+    glm_vec2_divs(ct->top, 500.f, textures[0]);
+    glm_vec2_divs(ct->bottom, 500.f, textures[1]);
+    glm_vec2_divs(ct->side, 500.f, textures[2]);
 }
 
 
@@ -226,8 +226,8 @@ void chunk_face_at(struct Chunk *c, ivec3 pos, float *face, struct CubeTexture *
         else if (face == g_bottom)  glm_vec2_copy(texcoords[1], coords);
         else                        glm_vec2_copy(texcoords[2], coords);
 
-        dest[i + 6] = dest[i + 6] ? coords[0] + 16.f / 80.f : coords[0];
-        dest[i + 7] = dest[i + 7] ? coords[1] + 16.f / 80.f : coords[1];
+        dest[i + 6] = dest[i + 6] ? coords[0] + 100.f / 500.f - 1.f / 500.f : coords[0] + 1.f / 500.f;
+        dest[i + 7] = dest[i + 7] ? coords[1] + 100.f / 500.f - 1.f / 500.f : coords[1] + 1.f / 500.f;
     }
 }
 
