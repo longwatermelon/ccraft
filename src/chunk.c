@@ -97,7 +97,7 @@ struct Chunk *chunk_alloc(struct World *w, vec3 pos)
             for (int z = 0; z < 16; ++z)
             {
                 /* c->grid[x][y][z] = 1 ? (y < 30 ? 1 : 0) : 0; */
-                c->grid[x][y][z] = x % 2 == 0 && z % 2 == 0 && y < 30 ? (y == 29 ? BLOCK_GRASS : BLOCK_DIRT) : BLOCK_AIR;
+                c->grid[x][y][z] = y < 15 ? (y == 14 ? BLOCK_GRASS : BLOCK_DIRT) : BLOCK_AIR;
             }
         }
     }

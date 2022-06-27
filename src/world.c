@@ -17,7 +17,7 @@ struct World *world_alloc()
     {
         for (int z = -48; z < 48; z += 16)
         {
-            w->chunks[idx++] = chunk_alloc(w, (vec3){ x, -15.f, z });
+            w->chunks[idx++] = chunk_alloc(w, (vec3){ x, 0.f, z });
         }
     }
 

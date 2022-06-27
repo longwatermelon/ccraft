@@ -11,7 +11,7 @@ struct Prog *prog_alloc(GLFWwindow *win)
     struct Prog *p = malloc(sizeof(struct Prog));
     p->win = win;
 
-    p->cam = cam_alloc((vec3){ 0.f, 30.f, 0.f }, (vec3){ 0.f, 0.f, 0.f });
+    p->cam = cam_alloc((vec3){ 0.f, 15.f, 0.f }, (vec3){ 0.f, 0.f, 0.f });
 
     p->ri = ri_alloc();
     ri_add_shader(p->ri, "shaders/basic_v.glsl", "shaders/basic_f.glsl");
