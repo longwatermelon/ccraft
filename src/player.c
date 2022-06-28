@@ -64,10 +64,7 @@ void player_check_collisions(struct Player *p, struct World *w, vec3 pos)
     pos[0] += p->vel[0];
     int block = world_get_block(w, pos, 0);
 
-    int sigx = pos[0] < 0 ? -1 : 1;
-    /* int sigz = pos[2] < 0 ? -1 : 1; */
-    /* ivec3 coords = { pos[0] + .5f * sigx, pos[1], pos[2] + .5f * sigz }; */
-    int xcoord = pos[0] + .5f * sigx;
+    int xcoord = pos[0];
 
     pos[1] -= 1.f;
     int block_bottom = world_get_block(w, pos, 0);
@@ -89,8 +86,7 @@ void player_check_collisions(struct Player *p, struct World *w, vec3 pos)
     pos[2] += p->vel[2];
     block = world_get_block(w, pos, 0);
 
-    int sigz = pos[2] < 0 ? -1 : 1;
-    int zcoord = pos[2] + .5f * sigz;
+    int zcoord = pos[2];
 
     pos[1] -= 1.f;
     block_bottom = world_get_block(w, pos, 0);
