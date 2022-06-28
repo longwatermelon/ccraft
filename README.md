@@ -1,3 +1,4 @@
-# gl-template
+# ccraft
 
-Template for future opengl projects with custom meshes
+Minecraft clone in c
+
