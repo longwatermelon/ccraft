@@ -108,6 +108,8 @@ struct Chunk *chunk_alloc(struct World *w, vec3 pos)
         }
     }
 
+    chunk_find_highest(c);
+
     return c;
 }
 

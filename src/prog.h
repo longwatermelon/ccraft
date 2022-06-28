@@ -3,6 +3,7 @@
 
 #include "shader.h"
 #include "render.h"
+#include "player.h"
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
@@ -11,7 +12,7 @@ struct Prog
     GLFWwindow *win;
     RenderInfo *ri;
 
-    struct Camera *cam;
+    struct Player *player;
 };
 
 struct Prog *prog_alloc(GLFWwindow *win);

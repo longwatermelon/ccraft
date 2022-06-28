@@ -28,6 +28,8 @@ struct Chunk *world_adjacent_chunk(struct World *w, struct Chunk *c, vec3 dir);
 
 struct CubeTexture *world_get_tex(struct World *w, int block);
 
+int world_get_block(struct World *w, vec3 pos, struct Chunk **chunk);
+
 void world_init_renderer();
 
 #endif

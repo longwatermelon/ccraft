@@ -142,6 +142,29 @@ struct CubeTexture *world_get_tex(struct World *w, int block)
 }
 
 
+int world_get_block(struct World *w, vec3 pos, struct Chunk **chunk)
+{
+    ivec3 coords = { pos[0], pos[1], pos[2] };
+
+
+    ivec3 idx = {
+        coords[0] / 16 - (coords[0] < 0 && coords[0] % 16 != 0 ? 1 : 0),
+        coords[1],
+        coords[2] / 16 - (coords[2] < 0 && coords[2] % 16 != 0 ? 1 : 0)
+    };
+
+    struct Chunk *c = w->chunks[idx[0] + RENDER_DISTANCE / 2][idx[2] + RENDER_DISTANCE / 2];
+    if (chunk) *chunk = c;
+
+    ivec2 block_idx = {
+        coords[0] - (coords[0] / 16 * 16 - ((coords[0] < 0 && coords[0] % 16 != 0) ? 16 : 0)),
+        coords[2] - (coords[2] / 16 * 16 - ((coords[2] < 0 && coords[2] % 16 != 0) ? 16 : 0)),
+    };
+
+    return c->grid[block_idx[0]][coords[1]][block_idx[1]];
+}
+
+
 void world_init_renderer()
 {
     glGenVertexArrays(1, &g_vao);
