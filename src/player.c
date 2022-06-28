@@ -22,26 +22,20 @@ void player_update(struct Player *p, struct World *w)
 {
     p->vel[1] -= .01f;
 
-    glm_vec3_add(p->cam->pos, p->vel, p->cam->pos);
+    vec3 pos;
+    glm_vec3_add(p->cam->pos, p->vel, pos);
 
-    /* struct Chunk *c; */
-    /* int block = world_get_block(w, p->cam->pos, &c); */
-    int block;
-    bool collide = false;
+    pos[1] -= 1.f;
+    int block = world_get_block(w, pos, 0);
+    pos[1] += 1.f;
 
-    vec3 pos = { p->cam->pos[0], p->cam->pos[1] - 1, p->cam->pos[2] };
-
-    while ((block = world_get_block(w, pos, 0)) != BLOCK_AIR)
+    if (block != BLOCK_AIR)
     {
-        pos[1] += 1.f;
-        collide = true;
-    }
-
-    if (collide)
-    {
-        p->cam->pos[1] = (int)pos[1] + 1;
+        pos[1] = (int)pos[1] + 1;
         p->vel[1] = 0.f;
     }
+
+    glm_vec3_copy(pos, p->cam->pos);
 }
 
 
