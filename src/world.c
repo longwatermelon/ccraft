@@ -144,7 +144,10 @@ struct CubeTexture *world_get_tex(struct World *w, int block)
 
 int world_get_block(struct World *w, vec3 pos, struct Chunk **chunk)
 {
-    ivec3 coords = { pos[0], pos[1], pos[2] };
+    int sigx = pos[0] < 0 ? -1 : 1;
+    int sigz = pos[2] < 0 ? -1 : 1;
+
+    ivec3 coords = { pos[0] + .5f * sigx, pos[1], pos[2] + .5f * sigz };
 
     ivec3 idx = {
         coords[0] / 16 - (coords[0] < 0 && coords[0] % 16 != 0 ? 1 : 0),
