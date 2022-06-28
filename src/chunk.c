@@ -88,7 +88,7 @@ struct Chunk *chunk_alloc(struct World *w, vec3 pos)
         for (int z = 0; z < 16; ++z)
         {
             float res = simplex2((c->pos[0] + x) * .01f, (c->pos[2] + z) * .01f, 8, .6f, 1.f);
-            c->heightmap[x][z] = 15.f + res * 150.f;
+            c->heightmap[x][z] = 15.f + res * 20.f;
         }
     }
 
