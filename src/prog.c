@@ -98,10 +98,31 @@ void prog_events(struct Prog *p)
     glm_vec3_scale(front, move, front);
     glm_vec3_scale(right, move, right);
 
-    if (glfwGetKey(p->win, GLFW_KEY_W) == GLFW_PRESS) glm_vec3_add(p->player->cam->pos, front, p->player->cam->pos);
-    if (glfwGetKey(p->win, GLFW_KEY_S) == GLFW_PRESS) glm_vec3_sub(p->player->cam->pos, front, p->player->cam->pos);
-    if (glfwGetKey(p->win, GLFW_KEY_A) == GLFW_PRESS) glm_vec3_sub(p->player->cam->pos, right, p->player->cam->pos);
-    if (glfwGetKey(p->win, GLFW_KEY_D) == GLFW_PRESS) glm_vec3_add(p->player->cam->pos, right, p->player->cam->pos);
+    vec3 back, left;
+    glm_vec3_negate_to(front, back);
+    glm_vec3_negate_to(right, left);
+
+    bool w = glfwGetKey(p->win, GLFW_KEY_W) == GLFW_PRESS;
+    bool a = glfwGetKey(p->win, GLFW_KEY_A) == GLFW_PRESS;
+    bool s = glfwGetKey(p->win, GLFW_KEY_S) == GLFW_PRESS;
+    bool d = glfwGetKey(p->win, GLFW_KEY_D) == GLFW_PRESS;
+
+    if (w) glm_vec3_add(front, p->player->vel, p->player->vel);
+    if (a) glm_vec3_add(left, p->player->vel, p->player->vel);
+    if (s) glm_vec3_add(back, p->player->vel, p->player->vel);
+    if (d) glm_vec3_add(right, p->player->vel, p->player->vel);
+
+    float y = p->player->vel[1];
+    p->player->vel[1] = 0.f;
+    glm_vec3_normalize(p->player->vel);
+    glm_vec3_scale(p->player->vel, move, p->player->vel);
+    p->player->vel[1] = y;
+
+    if (!w && !a && !s && !d)
+    {
+        p->player->vel[0] = 0.f;
+        p->player->vel[2] = 0.f;
+    }
 
     if (glfwGetKey(p->win, GLFW_KEY_SPACE) == GLFW_PRESS)
     {
