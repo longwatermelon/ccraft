@@ -88,7 +88,7 @@ struct Chunk *chunk_alloc(struct World *w, vec3 pos)
         for (int z = 0; z < 16; ++z)
         {
             float res = simplex2((c->pos[0] + x) * .01f, (c->pos[2] + z) * .01f, 8, .6f, 1.f);
-            c->heightmap[x][z] = res * 25.f;
+            c->heightmap[x][z] = 15.f + res * 150.f;
         }
     }
 
@@ -98,8 +98,10 @@ struct Chunk *chunk_alloc(struct World *w, vec3 pos)
         {
             for (int z = 0; z < 16; ++z)
             {
-                if (y < c->heightmap[x][z])
+                if (y == c->heightmap[x][z])
                     c->grid[x][y][z] = BLOCK_GRASS;
+                else if (y < c->heightmap[x][z])
+                    c->grid[x][y][z] = BLOCK_DIRT;
                 else
                     c->grid[x][y][z] = BLOCK_AIR;
             }
@@ -127,7 +129,7 @@ size_t chunk_visible_verts(struct Chunk *c, int side, struct Camera *cam, float 
     {
         for (int z = 0; z < 16; ++z)
         {
-            for (int y = 0; y < c->heightmap[x][z]; ++y)
+            for (int y = 0; y <= c->heightmap[x][z]; ++y)
             {
                 if (c->block_states[x][y][z] == BSTATE_ENCLOSED)
                     continue;

@@ -7,7 +7,7 @@
 int main()
 {
     srand(time(0));
-    seed(time(0));
+    seed(rand());
 
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
