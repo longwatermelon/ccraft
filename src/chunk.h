@@ -54,9 +54,8 @@ void chunk_free(struct Chunk *c);
 /* void chunk_render_cube(struct Chunk *c, RenderInfo *ri, int x, int y, int z, struct CubeTexture *tex); */
 /* void chunk_render_face(struct Chunk *c, RenderInfo *ri, int x, int y, int z, float *face, struct Texture *tex); */
 
-// Return number of visible verts
-// Modify vertbuffer, n
-size_t chunk_visible_verts(struct Chunk *c, struct Camera *cam, float **vertbuffer, size_t *n);
+// Modify vertbuffer, n, capacity
+void chunk_visible_verts(struct Chunk *c, struct Camera *cam, float **vertbuffer, size_t *count, size_t *capacity);
 void chunk_face_at(struct Chunk *c, ivec3 pos, float **verts, size_t *nverts, size_t *capacity, float *face);
 
 int chunk_get(struct Chunk *c, ivec3 pos, bool check_adjacent);

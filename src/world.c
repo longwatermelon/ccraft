@@ -57,50 +57,43 @@ void world_free(struct World *w)
 
 void world_render(struct World *w, RenderInfo *ri)
 {
-    mat4 model;
     shader_mat4(ri->shader, "view", ri->view);
     shader_mat4(ri->shader, "projection", ri->proj);
 
     tex_bind(w->atlas, 0);
+    size_t count = 0;
+
+    mat4 model;
+    glm_mat4_identity(model);
+    shader_mat4(ri->shader, "model", model);
 
     for (int x = 0; x < RENDER_DISTANCE; ++x)
     {
         for (int z = 0; z < RENDER_DISTANCE; ++z)
         {
             struct Chunk *chunk = w->chunks[x][z];
-
-            glm_mat4_identity(model);
-            glm_translate(model, chunk->pos);
-            shader_mat4(ri->shader, "model", model);
-
-            world_render_chunk(w, ri, chunk);
+            chunk_visible_verts(chunk, ri->cam, &w->vertbuffer, &count, &w->vertbuffer_size);
         }
     }
-}
 
-
-void world_render_chunk(struct World *w, RenderInfo *ri, struct Chunk *c)
-{
-    size_t n = chunk_visible_verts(c, ri->cam, &w->vertbuffer, &w->vertbuffer_size);
-
-    if (n)
+    if (count)
     {
         glBindBuffer(GL_ARRAY_BUFFER, g_vb);
 
-        if (n * sizeof(float) > g_vb_size)
+        if (count * sizeof(float) > g_vb_size)
         {
-            glBufferData(GL_ARRAY_BUFFER, n * sizeof(float), w->vertbuffer, GL_DYNAMIC_DRAW);
-            g_vb_size = n * sizeof(float);
+            glBufferData(GL_ARRAY_BUFFER, count * sizeof(float), w->vertbuffer, GL_DYNAMIC_DRAW);
+            g_vb_size = count * sizeof(float);
         }
         else
         {
-            glBufferSubData(GL_ARRAY_BUFFER, 0, n * sizeof(float), w->vertbuffer);
+            glBufferSubData(GL_ARRAY_BUFFER, 0, count * sizeof(float), w->vertbuffer);
         }
 
         glBindBuffer(GL_ARRAY_BUFFER, 0);
 
         glBindVertexArray(g_vao);
-        glDrawArrays(GL_TRIANGLES, 0, n / 8);
+        glDrawArrays(GL_TRIANGLES, 0, count / 8);
         glBindVertexArray(0);
     }
 }

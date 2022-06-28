@@ -4,7 +4,7 @@
 #include "chunk.h"
 #include "render.h"
 
-#define RENDER_DISTANCE 10
+#define RENDER_DISTANCE 16
 
 struct World
 {
@@ -23,7 +23,6 @@ struct World *world_alloc();
 void world_free(struct World *w);
 
 void world_render(struct World *w, RenderInfo *ri);
-void world_render_chunk(struct World *w, RenderInfo *ri, struct Chunk *c);
 
 struct Chunk *world_adjacent_chunk(struct World *w, struct Chunk *c, vec3 dir);
 

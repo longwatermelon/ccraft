@@ -118,10 +118,8 @@ void chunk_free(struct Chunk *c)
 }
 
 
-size_t chunk_visible_verts(struct Chunk *c, struct Camera *cam, float **vertbuffer, size_t *n)
+void chunk_visible_verts(struct Chunk *c, struct Camera *cam, float **vertbuffer, size_t *count, size_t *capacity)
 {
-    size_t counter = 0;
-
     vec3 cpos;
     glm_vec3_sub(cam->pos, c->pos, cpos);
 
@@ -139,43 +137,41 @@ size_t chunk_visible_verts(struct Chunk *c, struct Camera *cam, float **vertbuff
                 if (y < cpos[1])
                 {
                     if (!chunk_get(c, (ivec3){ x, y + 1, z }, false))
-                        chunk_face_at(c, pos, vertbuffer, &counter, n, g_top);
+                        chunk_face_at(c, pos, vertbuffer, count, capacity, g_top);
                 }
 
                 if (y > cpos[1])
                 {
                     if (!chunk_get(c, (ivec3){ x, y - 1, z }, false))
-                        chunk_face_at(c, pos, vertbuffer, &counter, n, g_bottom);
+                        chunk_face_at(c, pos, vertbuffer, count, capacity, g_bottom);
                 }
 
                 if (x < cpos[0])
                 {
                     if (!chunk_get(c, (ivec3){ x + 1, y, z }, false))
-                        chunk_face_at(c, pos, vertbuffer, &counter, n, g_back);
+                        chunk_face_at(c, pos, vertbuffer, count, capacity, g_back);
                 }
 
                 if (x > cpos[0])
                 {
                     if (!chunk_get(c, (ivec3){ x - 1, y, z }, false))
-                        chunk_face_at(c, pos, vertbuffer, &counter, n, g_front);
+                        chunk_face_at(c, pos, vertbuffer, count, capacity, g_front);
                 }
 
                 if (z < cpos[2])
                 {
                     if (!chunk_get(c, (ivec3){ x, y, z + 1 }, false))
-                        chunk_face_at(c, pos, vertbuffer, &counter, n, g_right);
+                        chunk_face_at(c, pos, vertbuffer, count, capacity, g_right);
                 }
 
                 if (z > cpos[2])
                 {
                     if (!chunk_get(c, (ivec3){ x, y, z - 1 }, false))
-                        chunk_face_at(c, pos, vertbuffer, &counter, n, g_left);
+                        chunk_face_at(c, pos, vertbuffer, count, capacity, g_left);
                 }
             }
         }
     }
-
-    return counter;
 }
 
 
@@ -204,9 +200,9 @@ void chunk_face_at(struct Chunk *c, ivec3 pos, float **verts, size_t *nverts, si
     for (size_t i = *nverts; i < *nverts + 48; i += 8)
     {
         // Position
-        arr[i] += pos[0];
-        arr[i + 1] += pos[1];
-        arr[i + 2] += pos[2];
+        arr[i] += c->pos[0] + pos[0];
+        arr[i + 1] += c->pos[1] + pos[1];
+        arr[i + 2] += c->pos[2] + pos[2];
 
         // Texture coords
         arr[i + 6] = arr[i + 6] ? coords[0] + 100.f / 500.f - adjust : coords[0] + adjust;
