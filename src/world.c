@@ -73,17 +73,15 @@ void world_render(struct World *w, RenderInfo *ri)
             glm_translate(model, chunk->pos);
             shader_mat4(ri->shader, "model", model);
 
-            world_render_side(w, ri, chunk, SIDE_TOP);
-            world_render_side(w, ri, chunk, SIDE_SIDE);
-            world_render_side(w, ri, chunk, SIDE_BOT);
+            world_render_chunk(w, ri, chunk);
         }
     }
 }
 
 
-void world_render_side(struct World *w, RenderInfo *ri, struct Chunk *c, int side)
+void world_render_chunk(struct World *w, RenderInfo *ri, struct Chunk *c)
 {
-    size_t n = chunk_visible_verts(c, side, ri->cam, &w->vertbuffer, &w->vertbuffer_size);
+    size_t n = chunk_visible_verts(c, ri->cam, &w->vertbuffer, &w->vertbuffer_size);
 
     if (n)
     {

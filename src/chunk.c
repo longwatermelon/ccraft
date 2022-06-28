@@ -118,7 +118,7 @@ void chunk_free(struct Chunk *c)
 }
 
 
-size_t chunk_visible_verts(struct Chunk *c, int side, struct Camera *cam, float **vertbuffer, size_t *n)
+size_t chunk_visible_verts(struct Chunk *c, struct Camera *cam, float **vertbuffer, size_t *n)
 {
     size_t counter = 0;
 
@@ -136,48 +136,40 @@ size_t chunk_visible_verts(struct Chunk *c, int side, struct Camera *cam, float 
 
                 ivec3 pos = { x, y, z };
 
-                switch (side)
+                if (y < cpos[1])
                 {
-                case SIDE_TOP:
-                    if (y < cpos[1])
-                    {
-                        if (!chunk_get(c, (ivec3){ x, y + 1, z }, false))
-                            chunk_face_at(c, pos, vertbuffer, &counter, n, g_top);
-                    }
-                    break;
-                case SIDE_BOT:
-                    if (y > cpos[1])
-                    {
-                        if (!chunk_get(c, (ivec3){ x, y - 1, z }, false))
-                            chunk_face_at(c, pos, vertbuffer, &counter, n, g_bottom);
-                    }
-                    break;
-                case SIDE_SIDE:
+                    if (!chunk_get(c, (ivec3){ x, y + 1, z }, false))
+                        chunk_face_at(c, pos, vertbuffer, &counter, n, g_top);
+                }
+
+                if (y > cpos[1])
                 {
-                    if (x < cpos[0])
-                    {
-                        if (!chunk_get(c, (ivec3){ x + 1, y, z }, false))
-                            chunk_face_at(c, pos, vertbuffer, &counter, n, g_back);
-                    }
+                    if (!chunk_get(c, (ivec3){ x, y - 1, z }, false))
+                        chunk_face_at(c, pos, vertbuffer, &counter, n, g_bottom);
+                }
 
-                    if (x > cpos[0])
-                    {
-                        if (!chunk_get(c, (ivec3){ x - 1, y, z }, false))
-                            chunk_face_at(c, pos, vertbuffer, &counter, n, g_front);
-                    }
+                if (x < cpos[0])
+                {
+                    if (!chunk_get(c, (ivec3){ x + 1, y, z }, false))
+                        chunk_face_at(c, pos, vertbuffer, &counter, n, g_back);
+                }
 
-                    if (z < cpos[2])
-                    {
-                        if (!chunk_get(c, (ivec3){ x, y, z + 1 }, false))
-                            chunk_face_at(c, pos, vertbuffer, &counter, n, g_right);
-                    }
+                if (x > cpos[0])
+                {
+                    if (!chunk_get(c, (ivec3){ x - 1, y, z }, false))
+                        chunk_face_at(c, pos, vertbuffer, &counter, n, g_front);
+                }
 
-                    if (z > cpos[2])
-                    {
-                        if (!chunk_get(c, (ivec3){ x, y, z - 1 }, false))
-                            chunk_face_at(c, pos, vertbuffer, &counter, n, g_left);
-                    }
-                } break;
+                if (z < cpos[2])
+                {
+                    if (!chunk_get(c, (ivec3){ x, y, z + 1 }, false))
+                        chunk_face_at(c, pos, vertbuffer, &counter, n, g_right);
+                }
+
+                if (z > cpos[2])
+                {
+                    if (!chunk_get(c, (ivec3){ x, y, z - 1 }, false))
+                        chunk_face_at(c, pos, vertbuffer, &counter, n, g_left);
                 }
             }
         }
