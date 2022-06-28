@@ -25,14 +25,29 @@ void player_update(struct Player *p, struct World *w)
     vec3 pos;
     glm_vec3_add(p->cam->pos, p->vel, pos);
 
-    pos[1] -= 1.f;
-    int block = world_get_block(w, pos, 0);
-    pos[1] += 1.f;
-
-    if (block != BLOCK_AIR)
+    // Vertical collision
+    if (p->vel[1] > 0.f)
     {
-        pos[1] = (int)pos[1] + 1;
-        p->vel[1] = 0.f;
+        int block = world_get_block(w, pos, 0);
+
+        if (block != BLOCK_AIR)
+        {
+            pos[1] = (int)pos[1];
+            p->vel[1] = 0.f;
+        }
+    }
+
+    if (p->vel[1] < 0.f)
+    {
+        pos[1] -= 1.f;
+        int block = world_get_block(w, pos, 0);
+        pos[1] += 1.f;
+
+        if (block != BLOCK_AIR)
+        {
+            pos[1] = (int)pos[1] + 1;
+            p->vel[1] = 0.f;
+        }
     }
 
     glm_vec3_copy(pos, p->cam->pos);
