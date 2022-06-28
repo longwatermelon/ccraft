@@ -22,6 +22,12 @@ enum
     BLOCK_DIRT
 };
 
+enum
+{
+    BSTATE_OPEN,
+    BSTATE_ENCLOSED
+};
+
 struct CubeTexture
 {
     vec2 top, bottom, side;
@@ -35,6 +41,8 @@ struct Chunk
     vec3 pos;
     int grid[16][256][16];
     int heightmap[16][16];
+
+    int block_states[16][256][16];
 
     struct World *world;
 };
@@ -51,9 +59,10 @@ void chunk_free(struct Chunk *c);
 size_t chunk_visible_verts(struct Chunk *c, int side, struct Camera *cam, float **vertbuffer, size_t *n);
 void chunk_face_at(struct Chunk *c, ivec3 pos, float **verts, size_t *nverts, size_t *capacity, float *face);
 
-int chunk_get(struct Chunk *c, ivec3 pos);
+int chunk_get(struct Chunk *c, ivec3 pos, bool check_adjacent);
 
 void chunk_find_highest(struct Chunk *c);
+void chunk_update_blockstates(struct Chunk *c);
 
 #endif
 

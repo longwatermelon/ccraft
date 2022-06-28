@@ -66,7 +66,6 @@ void prog_mainloop(struct Prog *p)
         cam_set_props(p->cam, p->ri->shader);
         cam_view_mat(p->cam, p->ri->view);
 
-        /* glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); */
         world_render(w, p->ri);
 
         glfwSwapBuffers(p->win);

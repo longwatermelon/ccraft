@@ -18,6 +18,14 @@ struct World *world_alloc()
         }
     }
 
+    for (int x = 0; x < RENDER_DISTANCE; ++x)
+    {
+        for (int z = 0; z < RENDER_DISTANCE; ++z)
+        {
+            chunk_update_blockstates(w->chunks[x][z]);
+        }
+    }
+
     w->ntexs = 2;
     w->texs = malloc(sizeof(struct CubeTexture*) * w->ntexs);
     w->texs[0] = ct_alloc((vec2){ 0.f, 0.f }, (vec2){ 200.f, 0.f }, (vec3){ 100.f, 0.f });

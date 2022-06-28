@@ -129,6 +129,9 @@ size_t chunk_visible_verts(struct Chunk *c, int side, struct Camera *cam, float 
         {
             for (int y = 0; y < c->heightmap[x][z]; ++y)
             {
+                if (c->block_states[x][y][z] == BSTATE_ENCLOSED)
+                    continue;
+
                 ivec3 pos = { x, y, z };
 
                 switch (side)
@@ -136,14 +139,14 @@ size_t chunk_visible_verts(struct Chunk *c, int side, struct Camera *cam, float 
                 case SIDE_TOP:
                     if (y < cpos[1])
                     {
-                        if (!chunk_get(c, (ivec3){ x, y + 1, z }))
+                        if (!chunk_get(c, (ivec3){ x, y + 1, z }, false))
                             chunk_face_at(c, pos, vertbuffer, &counter, n, g_top);
                     }
                     break;
                 case SIDE_BOT:
                     if (y > cpos[1])
                     {
-                        if (!chunk_get(c, (ivec3){ x, y - 1, z }))
+                        if (!chunk_get(c, (ivec3){ x, y - 1, z }, false))
                             chunk_face_at(c, pos, vertbuffer, &counter, n, g_bottom);
                     }
                     break;
@@ -151,25 +154,25 @@ size_t chunk_visible_verts(struct Chunk *c, int side, struct Camera *cam, float 
                 {
                     if (x < cpos[0])
                     {
-                        if (!chunk_get(c, (ivec3){ x + 1, y, z }))
+                        if (!chunk_get(c, (ivec3){ x + 1, y, z }, false))
                             chunk_face_at(c, pos, vertbuffer, &counter, n, g_back);
                     }
 
                     if (x > cpos[0])
                     {
-                        if (!chunk_get(c, (ivec3){ x - 1, y, z }))
+                        if (!chunk_get(c, (ivec3){ x - 1, y, z }, false))
                             chunk_face_at(c, pos, vertbuffer, &counter, n, g_front);
                     }
 
                     if (z < cpos[2])
                     {
-                        if (!chunk_get(c, (ivec3){ x, y, z + 1 }))
+                        if (!chunk_get(c, (ivec3){ x, y, z + 1 }, false))
                             chunk_face_at(c, pos, vertbuffer, &counter, n, g_right);
                     }
 
                     if (z > cpos[2])
                     {
-                        if (!chunk_get(c, (ivec3){ x, y, z - 1 }))
+                        if (!chunk_get(c, (ivec3){ x, y, z - 1 }, false))
                             chunk_face_at(c, pos, vertbuffer, &counter, n, g_left);
                     }
                 } break;
@@ -220,38 +223,42 @@ void chunk_face_at(struct Chunk *c, ivec3 pos, float **verts, size_t *nverts, si
 }
 
 
-int chunk_get(struct Chunk *c, ivec3 pos)
+int chunk_get(struct Chunk *c, ivec3 pos, bool check_adjacent)
 {
-    /* if (pos[1] < 0 || pos[1] >= 256) */
-    /*     return 0; */
+    if (check_adjacent)
+    {
+        if (pos[1] < 0 || pos[1] >= 256)
+            return 0;
 
-/*     bool x = pos[0] < 0 || pos[0] >= 16; */
-/*     bool z = pos[2] < 0 || pos[2] >= 16; */
+        bool x = pos[0] < 0 || pos[0] >= 16;
+        bool z = pos[2] < 0 || pos[2] >= 16;
 
+        if (x || z)
+        {
+            int sigx = x ? (pos[0] < 0 ? -1 : 1) : 0;
+            int sigz = z ? (pos[2] < 0 ? -1 : 1) : 0;
 
-/*     if (x || z) */
-/*     { */
-/*         int sigx = x ? (pos[0] < 0 ? -1 : 1) : 0; */
-/*         int sigz = z ? (pos[2] < 0 ? -1 : 1) : 0; */
+            vec3 dir = { sigx, 0.f, sigz };
+            struct Chunk *adjacent = world_adjacent_chunk(c->world, c, dir);
 
-/*         vec3 dir = { sigx, 0.f, sigz }; */
-/*         struct Chunk *adjacent = world_adjacent_chunk(c->world, c, dir); */
+            if (adjacent)
+            {
+                int ix = x ? (pos[0] - sigx * 16) : pos[0];
+                int iz = z ? (pos[2] - sigz * 16) : pos[2];
 
-/*         if (adjacent) */
-/*         { */
-/*             int ix = x ? (pos[0] - sigx * 16) : pos[0]; */
-/*             int iz = z ? (pos[2] - sigz * 16) : pos[2]; */
-
-/*             return adjacent->grid[ix][pos[1]][iz]; */
-/*         } */
-/*         else */
-/*         { */
-/*             return 0; */
-/*         } */
-/*     } */
-
-    if (pos[0] < 0 || pos[0] > 15 || pos[1] < 0 || pos[1] > 255 || pos[2] < 0 || pos[2] > 15)
-        return 0;
+                return adjacent->grid[ix][pos[1]][iz];
+            }
+            else
+            {
+                return 0;
+            }
+        }
+    }
+    else
+    {
+        if (pos[0] < 0 || pos[0] > 15 || pos[1] < 0 || pos[1] > 255 || pos[2] < 0 || pos[2] > 15)
+            return 0;
+    }
 
     return c->grid[pos[0]][pos[1]][pos[2]];
 }
@@ -275,6 +282,33 @@ void chunk_find_highest(struct Chunk *c)
             {
                 if (c->grid[x][y][z] && y > c->heightmap[x][z])
                     c->heightmap[x][z] = y;
+            }
+        }
+    }
+}
+
+
+void chunk_update_blockstates(struct Chunk *c)
+{
+    for (int x = 0; x < 16; ++x)
+    {
+        for (int y = 0; y < 256; ++y)
+        {
+            for (int z = 0; z < 16; ++z)
+            {
+                if (chunk_get(c, (ivec3){ x - 1, y, z }, true) &&
+                    chunk_get(c, (ivec3){ x + 1, y, z }, true) &&
+                    chunk_get(c, (ivec3){ x, y - 1, z }, true) &&
+                    chunk_get(c, (ivec3){ x, y + 1, z }, true) &&
+                    chunk_get(c, (ivec3){ x, y, z - 1 }, true) &&
+                    chunk_get(c, (ivec3){ x, y, z + 1 }, true))
+                {
+                    c->block_states[x][y][z] = BSTATE_ENCLOSED;
+                }
+                else
+                {
+                    c->block_states[x][y][z] = BSTATE_OPEN;
+                }
             }
         }
     }
