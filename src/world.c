@@ -147,7 +147,13 @@ int world_get_block(struct World *w, vec3 pos, struct Chunk **chunk)
     int sigx = pos[0] < 0 ? -1 : 1;
     int sigz = pos[2] < 0 ? -1 : 1;
 
-    ivec3 coords = { pos[0] + .5f * sigx, pos[1], pos[2] + .5f * sigz };
+    vec3 center;
+    world_center(w, center);
+
+    vec3 fcoords;
+    glm_vec3_sub(pos, center, fcoords);
+
+    ivec3 coords = { fcoords[0] + .5f * sigx, pos[1], fcoords[2] + .5f * sigz };
 
     ivec3 idx = {
         coords[0] / 16 - (coords[0] < 0 && coords[0] % 16 != 0 ? 1 : 0),
@@ -164,6 +170,16 @@ int world_get_block(struct World *w, vec3 pos, struct Chunk **chunk)
     };
 
     return c->grid[block_idx[0]][coords[1]][block_idx[1]];
+}
+
+
+void world_center(struct World *w, vec3 dest)
+{
+    vec3 center = { 16.f, 0.f, 16.f };
+    glm_vec3_addadd(w->chunks[RENDER_DISTANCE - 1][RENDER_DISTANCE - 1]->pos, w->chunks[0][0]->pos, center);
+    glm_vec3_scale(center, .5f, center);
+
+    glm_vec3_copy(center, dest);
 }
 
 

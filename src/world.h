@@ -30,6 +30,8 @@ struct CubeTexture *world_get_tex(struct World *w, int block);
 
 int world_get_block(struct World *w, vec3 pos, struct Chunk **chunk);
 
+void world_center(struct World *w, vec3 dest);
+
 void world_init_renderer();
 
 #endif
