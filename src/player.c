@@ -4,7 +4,7 @@
 struct Player *player_alloc()
 {
     struct Player *p = malloc(sizeof(struct Player));
-    p->cam = cam_alloc((vec3){ 0.f, 100.f, 0.f }, (vec3){ 0.f, 0.f, 0.f });
+    p->cam = cam_alloc((vec3){ 0.f, 200.f, 0.f }, (vec3){ 0.f, 0.f, 0.f });
     glm_vec3_copy((vec3){ 0.f, 0.f, 0.f }, p->vel);
 
     return p;
