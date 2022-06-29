@@ -61,7 +61,9 @@ void player_check_collisions(struct Player *p, struct World *w, vec3 pos)
 
 
     // Horizontal collision x
-    pos[0] += p->vel[0];
+    int sigx = p->vel[0] < 0 ? -1 : 1;
+
+    pos[0] += p->vel[0] + .1f * sigx;
     int block = world_get_block(w, pos, 0);
 
     int xcoord = pos[0];
@@ -75,15 +77,17 @@ void player_check_collisions(struct Player *p, struct World *w, vec3 pos)
     if (block != BLOCK_AIR || block_bottom != BLOCK_AIR)
     {
         if (p->vel[0] > 0.f)
-            pos[0] = xcoord - .5f;
+            pos[0] = xcoord - .6f;
         else if (p->vel[0] < 0.f)
-            pos[0] = xcoord + .5f;
+            pos[0] = xcoord + .6f;
 
         p->vel[0] = 0.f;
     }
 
     // Horizontal collision z
-    pos[2] += p->vel[2];
+    int sigz = p->vel[2] < 0 ? -1 : 1;
+
+    pos[2] += p->vel[2] + .1f * sigz;
     block = world_get_block(w, pos, 0);
 
     int zcoord = pos[2];
@@ -97,9 +101,9 @@ void player_check_collisions(struct Player *p, struct World *w, vec3 pos)
     if (block != BLOCK_AIR || block_bottom != BLOCK_AIR)
     {
         if (p->vel[2] > 0.f)
-            pos[2] = zcoord - .5f;
+            pos[2] = zcoord - .6f;
         else if (p->vel[2] < 0.f)
-            pos[2] = zcoord + .5f;
+            pos[2] = zcoord + .6f;
 
         p->vel[2] = 0.f;
     }
