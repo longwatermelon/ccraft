@@ -50,10 +50,6 @@ struct Chunk
 struct Chunk *chunk_alloc(struct World *w, vec3 pos);
 void chunk_free(struct Chunk *c);
 
-/* void chunk_render(struct Chunk *c, RenderInfo *ri, struct CubeTexture *tex); */
-/* void chunk_render_cube(struct Chunk *c, RenderInfo *ri, int x, int y, int z, struct CubeTexture *tex); */
-/* void chunk_render_face(struct Chunk *c, RenderInfo *ri, int x, int y, int z, float *face, struct Texture *tex); */
-
 // Modify vertbuffer, n, capacity
 void chunk_visible_verts(struct Chunk *c, struct Camera *cam, float **vertbuffer, size_t *count, size_t *capacity);
 void chunk_face_at(struct Chunk *c, ivec3 pos, float **verts, size_t *nverts, size_t *capacity, float *face);
