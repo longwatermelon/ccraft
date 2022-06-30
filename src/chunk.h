@@ -62,6 +62,7 @@ int chunk_get(struct Chunk *c, ivec3 pos, bool check_adjacent);
 
 void chunk_find_highest(struct Chunk *c);
 void chunk_update_blockstates(struct Chunk *c);
+void chunk_gen_terrain(struct Chunk *c);
 
 #endif
 

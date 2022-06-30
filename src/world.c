@@ -144,14 +144,17 @@ struct CubeTexture *world_get_tex(struct World *w, int block)
 
 int world_get_block(struct World *w, vec3 pos, struct Chunk **chunk)
 {
-    int sigx = pos[0] < 0 ? -1 : 1;
-    int sigz = pos[2] < 0 ? -1 : 1;
+    /* int sigx = pos[0] < 0 ? -1 : 1; */
+    /* int sigz = pos[2] < 0 ? -1 : 1; */
 
     vec3 center;
     world_center(w, center);
 
     vec3 fcoords;
     glm_vec3_sub(pos, center, fcoords);
+
+    int sigx = fcoords[0] < 0 ? -1 : 1;
+    int sigz = fcoords[2] < 0 ? -1 : 1;
 
     ivec3 coords = { fcoords[0] + .5f * sigx, pos[1], fcoords[2] + .5f * sigz };
 
@@ -180,6 +183,49 @@ void world_center(struct World *w, vec3 dest)
     glm_vec3_scale(center, .5f, center);
 
     glm_vec3_copy(center, dest);
+}
+
+
+void world_gen_chunks(struct World *w, vec3 cam)
+{
+    vec3 center;
+    world_center(w, center);
+
+    center[1] = cam[1];
+
+    vec3 diff;
+    glm_vec3_sub(cam, center, diff);
+
+    diff[1] = 0.f;
+
+    /* printf("%f %f %f\n", cam[0], cam[1], cam[2]); */
+
+    if (glm_vec3_distance(cam, center) > 16.f)
+    {
+        printf("Generate chunks\n");
+        vec3 move = {
+            diff[0] ? (diff[0] < 0 ? -16.f : 16.f) : 0,
+            0.f,
+            diff[2] ? (diff[2] < 0 ? -16.f : 16.f) : 0
+        };
+
+        for (int x = 0; x < RENDER_DISTANCE; ++x)
+        {
+            for (int z = 0; z < RENDER_DISTANCE; ++z)
+            {
+                glm_vec3_add(w->chunks[x][z]->pos, move, w->chunks[x][z]->pos);
+                chunk_gen_terrain(w->chunks[x][z]);
+            }
+        }
+
+        for (int x = 0; x < RENDER_DISTANCE; ++x)
+        {
+            for (int z = 0; z < RENDER_DISTANCE; ++z)
+            {
+                chunk_update_blockstates(w->chunks[x][z]);
+            }
+        }
+    }
 }
 
 

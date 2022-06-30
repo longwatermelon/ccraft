@@ -83,32 +83,7 @@ struct Chunk *chunk_alloc(struct World *w, vec3 pos)
     glm_vec3_copy(pos, c->pos);
     c->world = w;
 
-    for (int x = 0; x < 16; ++x)
-    {
-        for (int z = 0; z < 16; ++z)
-        {
-            float res = simplex2((c->pos[0] + x) * .02f, (c->pos[2] + z) * .02f, 8, .6f, 1.f);
-            c->heightmap[x][z] = 15.f + res * 100.f;
-        }
-    }
-
-    for (int y = 0; y < 256; ++y)
-    {
-        for (int x = 0; x < 16; ++x)
-        {
-            for (int z = 0; z < 16; ++z)
-            {
-                if (y == c->heightmap[x][z])
-                    c->grid[x][y][z] = BLOCK_GRASS;
-                else if (y < c->heightmap[x][z])
-                    c->grid[x][y][z] = BLOCK_DIRT;
-                else
-                    c->grid[x][y][z] = BLOCK_AIR;
-            }
-        }
-    }
-
-    chunk_find_highest(c);
+    chunk_gen_terrain(c);
 
     return c;
 }
@@ -301,6 +276,35 @@ void chunk_update_blockstates(struct Chunk *c)
                 {
                     c->block_states[x][y][z] = BSTATE_OPEN;
                 }
+            }
+        }
+    }
+}
+
+
+void chunk_gen_terrain(struct Chunk *c)
+{
+    for (int x = 0; x < 16; ++x)
+    {
+        for (int z = 0; z < 16; ++z)
+        {
+            float res = simplex2((c->pos[0] + x) * .02f, (c->pos[2] + z) * .02f, 8, .6f, 1.f);
+            c->heightmap[x][z] = 15.f + res * 20.f;
+        }
+    }
+
+    for (int y = 0; y < 256; ++y)
+    {
+        for (int x = 0; x < 16; ++x)
+        {
+            for (int z = 0; z < 16; ++z)
+            {
+                if (y == c->heightmap[x][z])
+                    c->grid[x][y][z] = BLOCK_GRASS;
+                else if (y < c->heightmap[x][z])
+                    c->grid[x][y][z] = BLOCK_DIRT;
+                else
+                    c->grid[x][y][z] = BLOCK_AIR;
             }
         }
     }

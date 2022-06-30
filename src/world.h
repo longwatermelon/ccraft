@@ -4,7 +4,7 @@
 #include "chunk.h"
 #include "render.h"
 
-#define RENDER_DISTANCE 12
+#define RENDER_DISTANCE 24
 
 struct World
 {
@@ -31,6 +31,8 @@ struct CubeTexture *world_get_tex(struct World *w, int block);
 int world_get_block(struct World *w, vec3 pos, struct Chunk **chunk);
 
 void world_center(struct World *w, vec3 dest);
+
+void world_gen_chunks(struct World *w, vec3 cam);
 
 void world_init_renderer();
 
