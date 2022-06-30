@@ -18,7 +18,7 @@ void main()
     vec3 ambient = 0.4 * vec3(texture(tex, TexCoords));
 
     vec3 norm = normalize(Normal);
-    vec3 light_dir = normalize(vec3(0.3, 1.0, 0.4));
+    vec3 light_dir = normalize(vec3(.3, .6, .4));
     float diff = max(dot(norm, light_dir), 0.0);
     vec3 diffuse = 0.4 * diff * vec3(texture(tex, TexCoords));
 
