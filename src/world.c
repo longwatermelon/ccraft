@@ -198,11 +198,8 @@ void world_gen_chunks(struct World *w, vec3 cam)
 
     diff[1] = 0.f;
 
-    /* printf("%f %f %f\n", cam[0], cam[1], cam[2]); */
-
     if (glm_vec3_distance(cam, center) > 16.f)
     {
-        printf("Generate chunks\n");
         vec3 move = {
             diff[0] ? (diff[0] < 0 ? -16.f : 16.f) : 0,
             0.f,
