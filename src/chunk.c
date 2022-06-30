@@ -289,7 +289,7 @@ void chunk_gen_terrain(struct Chunk *c)
         for (int z = 0; z < 16; ++z)
         {
             float res = simplex2((c->pos[0] + x) * .02f, (c->pos[2] + z) * .02f, 8, .6f, 1.f);
-            c->heightmap[x][z] = 15.f + res * 20.f;
+            c->heightmap[x][z] = 15.f + res * 100.f;
         }
     }
 

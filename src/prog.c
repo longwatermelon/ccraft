@@ -64,12 +64,12 @@ void prog_mainloop(struct Prog *p)
 
         prog_events(p);
 
-        float fov = 45.f;
-
         if (p->player->vel[1] < -.2f)
-            fov = 45.f + ((-p->player->vel[1] - .2f) * 50.f);
+            p->ri->fov = 45.f + ((-p->player->vel[1] - .2f) * 50.f);
+        else
+            p->ri->fov += (45.f - p->ri->fov) / 5.f;
 
-        glm_perspective(glm_rad(fmin(fov, 150.f)), 800.f / 600.f, .1f, 1000.f, p->ri->proj);
+        glm_perspective(glm_rad(fmin(p->ri->fov, 150.f)), 800.f / 600.f, .1f, 1000.f, p->ri->proj);
 
         player_update(p->player, w);
 

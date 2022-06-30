@@ -19,6 +19,7 @@ typedef struct
 
     mat4 proj, view;
     struct Camera *cam;
+    float fov;
 } RenderInfo;
 
 RenderInfo *ri_alloc();
