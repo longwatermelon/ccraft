@@ -1,4 +1,6 @@
 #include "world.h"
+#include "util.h"
+#include <string.h>
 #include <glad/glad.h>
 
 unsigned int g_vao, g_vb;
@@ -142,7 +144,7 @@ struct CubeTexture *world_get_tex(struct World *w, int block)
 }
 
 
-int world_get_block(struct World *w, vec3 pos, struct Chunk **chunk)
+int world_get_block(struct World *w, vec3 pos, struct Chunk **chunk, ivec3 index)
 {
     /* int sigx = pos[0] < 0 ? -1 : 1; */
     /* int sigz = pos[2] < 0 ? -1 : 1; */
@@ -164,7 +166,18 @@ int world_get_block(struct World *w, vec3 pos, struct Chunk **chunk)
         coords[2] / 16 - (coords[2] < 0 && coords[2] % 16 != 0 ? 1 : 0)
     };
 
-    struct Chunk *c = w->chunks[idx[0] + RENDER_DISTANCE / 2][idx[2] + RENDER_DISTANCE / 2];
+    ivec2 chunk_index = {
+        idx[0] + RENDER_DISTANCE / 2,
+        idx[2] + RENDER_DISTANCE / 2
+    };
+
+    if (chunk_index[0] < 0 || chunk_index[0] >= RENDER_DISTANCE ||
+        chunk_index[1] < 0 || chunk_index[1] >= RENDER_DISTANCE)
+    {
+        return 0;
+    }
+
+    struct Chunk *c = w->chunks[chunk_index[0]][chunk_index[1]];
     if (chunk) *chunk = c;
 
     ivec2 block_idx = {
@@ -172,7 +185,141 @@ int world_get_block(struct World *w, vec3 pos, struct Chunk **chunk)
         coords[2] - (coords[2] / 16 * 16 - ((coords[2] < 0 && coords[2] % 16 != 0) ? 16 : 0)),
     };
 
+    if (index)
+    {
+        index[0] = block_idx[0];
+        index[1] = coords[1];
+        index[2] = block_idx[1];
+    }
+
     return c->grid[block_idx[0]][coords[1]][block_idx[1]];
+}
+
+
+float world_cast_ray(struct World *w, struct Camera *cam, struct Chunk **chunk, ivec3 coords)
+{
+    ivec3 x, y, z;
+    struct Chunk *cx, *cy, *cz;
+
+    float dx = world_cast_rayx(w, cam, &cx, x);
+    float dy = world_cast_rayy(w, cam, &cy, y);
+    float dz = world_cast_rayz(w, cam, &cz, z);
+
+    ivec3 *c;
+    float min = dx;
+    c = &x;
+    *chunk = cx;
+
+    if (dy < min)
+    {
+        min = dy;
+        c = &y;
+        *chunk = cy;
+    }
+
+    if (dz < min)
+    {
+        min = dz;
+        c = &z;
+        *chunk = cz;
+    }
+
+    memcpy(coords, *c, 3 * sizeof(int));
+    return min;
+}
+
+
+float world_cast_rayx(struct World *w, struct Camera *cam, struct Chunk **c, ivec3 coords)
+{
+    vec3 ray;
+
+    bool facing_forwards = cam->rot[2] > 3.f * M_PI / 2.f || cam->rot[2] < M_PI / 2.f;
+    ray[0] = (int)cam->pos[0] + (facing_forwards ? 1 : 0);
+
+    float a = (ray[0] - cam->pos[0]) / cosf(cam->rot[2]);
+    ray[1] = cam->pos[1] + a * tanf(cam->rot[1]);
+    ray[2] = cam->pos[2] - a * sinf(cam->rot[2]);
+
+    int depth = 0;
+    while (depth < 8)
+    {
+        if (world_get_block(w, ray, c, coords))
+            return glm_vec3_distance(ray, cam->pos);
+
+        ray[0] += facing_forwards ? 1 : -1;
+        a = (ray[0] - cam->pos[0]) / cosf(cam->rot[2]);
+        ray[1] = cam->pos[1] + a * tanf(cam->rot[1]);
+        ray[2] = cam->pos[2] - a * sinf(cam->rot[2]);
+
+        ++depth;
+    }
+
+    return INFINITY;
+}
+
+
+float world_cast_rayy(struct World *w, struct Camera *cam, struct Chunk **c, ivec3 coords)
+{
+    vec3 ray;
+
+    bool facing_up = cam->rot[1] < M_PI / 2.f;
+    ray[1] = (int)cam->pos[1] + (facing_up ? 1 : 0);
+
+    float a = (ray[1] - cam->pos[1]) / tanf(cam->rot[1]);
+    ray[0] = cam->pos[0] + a * cosf(cam->rot[2]);
+    ray[2] = cam->pos[2] - a * sinf(cam->rot[2]);
+
+    int depth = 0;
+    while (depth < 8)
+    {
+        if (world_get_block(w, ray, c, coords))
+            return glm_vec3_distance(ray, cam->pos);
+
+        ray[1] += facing_up ? 1 : -1;
+        a = (ray[1] - cam->pos[1]) / tanf(cam->rot[1]);
+        ray[0] = cam->pos[0] + a * cosf(cam->rot[2]);
+        ray[2] = cam->pos[2] - a * sinf(cam->rot[2]);
+
+        ++depth;
+    }
+
+    return INFINITY;
+}
+
+
+float world_cast_rayz(struct World *w, struct Camera *cam, struct Chunk **c, ivec3 coords)
+{
+    vec3 ray;
+    float tmp = cam->rot[2];
+    cam->rot[2] = 2.f * M_PI - cam->rot[2];
+    util_restrict_angle(cam->rot[2]);
+
+    bool facing_right = cam->rot[2] < M_PI;
+    ray[2] = (int)cam->pos[2] + (facing_right ? 1 : 0);
+
+    float a = (ray[2] - cam->pos[2]) / sinf(cam->rot[2]);
+    ray[0] = cam->pos[0] + a * cosf(cam->rot[2]);
+    ray[1] = cam->pos[1] + a * tanf(cam->rot[1]);
+
+    int depth = 0;
+    while (depth < 8)
+    {
+        if (world_get_block(w, ray, c, coords))
+        {
+            cam->rot[2] = tmp;
+            return glm_vec3_distance(ray, cam->pos);
+        }
+
+        ray[2] += facing_right ? 1 : -1;
+        a = (ray[2] - cam->pos[2]) / sinf(cam->rot[2]);
+        ray[0] = cam->pos[0] + a * cosf(cam->rot[2]);
+        ray[1] = cam->pos[1] + a * tanf(cam->rot[1]);
+
+        ++depth;
+    }
+
+    cam->rot[2] = tmp;
+    return INFINITY;
 }
 
 

@@ -28,7 +28,14 @@ struct Chunk *world_adjacent_chunk(struct World *w, struct Chunk *c, vec3 dir);
 
 struct CubeTexture *world_get_tex(struct World *w, int block);
 
-int world_get_block(struct World *w, vec3 pos, struct Chunk **chunk);
+// out: chunk, index
+int world_get_block(struct World *w, vec3 pos, struct Chunk **chunk, ivec3 index);
+
+// out: coords
+float world_cast_ray(struct World *w, struct Camera *cam, struct Chunk **chunk, ivec3 coords);
+float world_cast_rayx(struct World *w, struct Camera *cam, struct Chunk **c, ivec3 coords);
+float world_cast_rayy(struct World *w, struct Camera *cam, struct Chunk **c, ivec3 coords);
+float world_cast_rayz(struct World *w, struct Camera *cam, struct Chunk **c, ivec3 coords);
 
 void world_center(struct World *w, vec3 dest);
 

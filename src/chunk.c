@@ -154,6 +154,10 @@ void chunk_visible_verts(struct Chunk *c, struct Camera *cam, float **vertbuffer
 
 void chunk_face_at(struct Chunk *c, ivec3 pos, float **verts, size_t *nverts, size_t *capacity, float *face)
 {
+    int block = c->grid[pos[0]][pos[1]][pos[2]];
+    if (!block)
+        return;
+
     if (*nverts + 48 >= *capacity)
     {
         *capacity += 48000;
@@ -163,7 +167,6 @@ void chunk_face_at(struct Chunk *c, ivec3 pos, float **verts, size_t *nverts, si
     float *arr = *verts;
     memcpy(&arr[*nverts], face, 48 * sizeof(float));
 
-    int block = c->grid[pos[0]][pos[1]][pos[2]];
     struct CubeTexture *tex = world_get_tex(c->world, block);
 
     vec2 coords;

@@ -90,7 +90,9 @@ void prog_mainloop(struct Prog *p)
         prev_mx = mx;
         prev_my = my;
 
-        /* printf("%f %f %f\n", p->player->cam->rot[0], p->player->cam->rot[1], p->player->cam->rot[2]); */
+        util_restrict_vangle(p->player->cam->rot, p->player->cam->rot);
+
+        printf("%f %f %f\n", p->player->cam->rot[0], p->player->cam->rot[1], p->player->cam->rot[2]);
 
         prog_events(p);
 
@@ -104,6 +106,22 @@ void prog_mainloop(struct Prog *p)
         player_update(p->player, w);
 
         world_gen_chunks(w, p->player->cam->pos);
+
+        struct Chunk *c;
+        ivec3 coords;
+        float dist;
+        if ((dist = world_cast_ray(w, p->player->cam, &c, coords)) != INFINITY)
+        {
+            if (c)
+            {
+                /* printf("%f %f %f %f\n", dist, p->player->cam->pos[0], p->player->cam->pos[1], p->player->cam->pos[2]); */
+                c->grid[coords[0]][coords[1]][coords[2]] = 0;
+                /* printf("%d %d %d\n", coords[0], coords[1], coords[2]); */
+                chunk_update_blockstates(c);
+                chunk_find_highest(c);
+            }
+        }
+
 
         glClearColor(0.f, 0.f, 0.f, 1.f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
