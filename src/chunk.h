@@ -51,8 +51,8 @@ struct Chunk *chunk_alloc(struct World *w, vec3 pos);
 void chunk_free(struct Chunk *c);
 
 // Modify vertbuffer, n, capacity
-void chunk_visible_verts(struct Chunk *c, struct Camera *cam, float **vertbuffer, size_t *count, size_t *capacity);
-void chunk_face_at(struct Chunk *c, ivec3 pos, float **verts, size_t *nverts, size_t *capacity, float *face);
+void chunk_visible_verts(struct Chunk *c, struct Camera *cam, float **vertbuffer, size_t *count, size_t *capacity, ivec3 selected);
+void chunk_face_at(struct Chunk *c, ivec3 pos, float **verts, size_t *nverts, size_t *capacity, float *face, ivec3 selected);
 
 int chunk_get(struct Chunk *c, ivec3 pos, bool check_adjacent);
 

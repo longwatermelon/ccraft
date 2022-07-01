@@ -35,7 +35,7 @@ struct World *world_alloc()
 
     w->atlas = tex_alloc("res/atlas.png");
 
-    w->vertbuffer_size = 48000;
+    w->vertbuffer_size = 72000;
     w->vertbuffer = malloc(sizeof(float) * w->vertbuffer_size);
 
     return w;
@@ -57,7 +57,7 @@ void world_free(struct World *w)
 }
 
 
-void world_render(struct World *w, RenderInfo *ri)
+void world_render(struct World *w, RenderInfo *ri, ivec3 selected)
 {
     shader_mat4(ri->shader, "view", ri->view);
     shader_mat4(ri->shader, "projection", ri->proj);
@@ -74,7 +74,7 @@ void world_render(struct World *w, RenderInfo *ri)
         for (int z = 0; z < RENDER_DISTANCE; ++z)
         {
             struct Chunk *chunk = w->chunks[x][z];
-            chunk_visible_verts(chunk, ri->cam, &w->vertbuffer, &count, &w->vertbuffer_size);
+            chunk_visible_verts(chunk, ri->cam, &w->vertbuffer, &count, &w->vertbuffer_size, selected);
         }
     }
 
@@ -95,7 +95,7 @@ void world_render(struct World *w, RenderInfo *ri)
         glBindBuffer(GL_ARRAY_BUFFER, 0);
 
         glBindVertexArray(g_vao);
-        glDrawArrays(GL_TRIANGLES, 0, count / 8);
+        glDrawArrays(GL_TRIANGLES, 0, count / 12);
         glBindVertexArray(0);
     }
 }
@@ -381,14 +381,17 @@ void world_init_renderer()
     glBufferData(GL_ARRAY_BUFFER, 0, 0, GL_DYNAMIC_DRAW);
     g_vb_size = 0;
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), 0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 12 * sizeof(float), 0);
     glEnableVertexAttribArray(0);
 
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 12 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
 
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 12 * sizeof(float), (void*)(6 * sizeof(float)));
     glEnableVertexAttribArray(2);
+
+    glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, 12 * sizeof(float), (void*)(8 * sizeof(float)));
+    glEnableVertexAttribArray(3);
 
     glBindVertexArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);

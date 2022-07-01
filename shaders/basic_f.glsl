@@ -4,6 +4,7 @@ out vec4 FragColor;
 in vec3 FragPos;
 in vec3 Normal;
 in vec2 TexCoords;
+in vec4 Color;
 
 uniform sampler2D tex;
 
@@ -15,7 +16,7 @@ void main()
     /* if (Normal.z != 0) shading = shading * 0.7; */
     /* if (Normal.y < 0) shading = shading * 0.5; */
 
-    vec3 ambient = 0.6 * vec3(texture(tex, TexCoords));
+    vec3 ambient = 0.6 * vec3(mix(texture(tex, TexCoords), Color, Color.a));
 
     vec3 norm = normalize(Normal);
     vec3 light_dir = normalize(vec3(-1., .8, -.8));

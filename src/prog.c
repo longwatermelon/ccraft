@@ -70,6 +70,9 @@ void prog_mainloop(struct Prog *p)
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
 
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
     glfwSetCursorPos(p->win, 400.f, 300.f);
     glfwSetInputMode(p->win, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
@@ -92,7 +95,7 @@ void prog_mainloop(struct Prog *p)
 
         util_restrict_vangle(p->player->cam->rot, p->player->cam->rot);
 
-        printf("%f %f %f\n", p->player->cam->rot[0], p->player->cam->rot[1], p->player->cam->rot[2]);
+        /* printf("%f %f %f\n", p->player->cam->rot[0], p->player->cam->rot[1], p->player->cam->rot[2]); */
 
         prog_events(p);
 
@@ -107,21 +110,12 @@ void prog_mainloop(struct Prog *p)
 
         world_gen_chunks(p->world, p->player->cam->pos);
 
-        /* struct Chunk *c; */
-        /* ivec3 coords; */
-        /* float dist; */
-        /* if ((dist = world_cast_ray(w, p->player->cam, &c, coords)) != INFINITY) */
-        /* { */
-        /*     if (c) */
-        /*     { */
-        /*         /1* printf("%f %f %f %f\n", dist, p->player->cam->pos[0], p->player->cam->pos[1], p->player->cam->pos[2]); *1/ */
-        /*         c->grid[coords[0]][coords[1]][coords[2]] = 0; */
-        /*         /1* printf("%d %d %d\n", coords[0], coords[1], coords[2]); *1/ */
-        /*         chunk_update_blockstates(c); */
-        /*         chunk_find_highest(c); */
-        /*     } */
-        /* } */
+        struct Chunk *c;
+        ivec3 coords;
+        float dist = world_cast_ray(p->world, p->player->cam, &c, coords);
 
+        if (dist > 8.f)
+            coords[0] = -1; // Don't highlight any block
 
         glClearColor(0.f, 0.f, 0.f, 1.f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -135,7 +129,7 @@ void prog_mainloop(struct Prog *p)
         cam_view_mat(p->player->cam, p->ri->view);
 
         /* glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); */
-        world_render(p->world, p->ri);
+        world_render(p->world, p->ri, coords);
 
         ri_use_shader(p->ri, SHADER_COLOR);
         glBindVertexArray(p->crosshair_vao);
@@ -201,7 +195,7 @@ void prog_events(struct Prog *p)
 
     static float last_lmb = 0.f;
 
-    if (glfwGetMouseButton(p->win, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS && glfwGetTime() - last_lmb > .5f)
+    if (glfwGetMouseButton(p->win, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS && glfwGetTime() - last_lmb > .3f)
     {
         last_lmb = glfwGetTime();
 
@@ -209,7 +203,7 @@ void prog_events(struct Prog *p)
         ivec3 coords;
         float dist = world_cast_ray(p->world, p->player->cam, &c, coords);
 
-        if (dist < INFINITY)
+        if (dist < 8.f)
         {
             c->grid[coords[0]][coords[1]][coords[2]] = 0;
             chunk_update_blockstates(c);

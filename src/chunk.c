@@ -7,57 +7,57 @@
 #include <noise/noise.h>
 
 float g_left[] = {
-     0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
-     0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  1.0f,
-    -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
-    -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
-    -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  0.0f,
-     0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f
+     0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f, 0.f, 0.f, 0.f, 0.f,
+     0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  1.0f, 0.f, 0.f, 0.f, 0.f,
+    -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f, 0.f, 0.f, 0.f, 0.f,
+    -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f, 0.f, 0.f, 0.f, 0.f,
+    -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  0.0f, 0.f, 0.f, 0.f, 0.f,
+     0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f, 0.f, 0.f, 0.f, 0.f
 };
 
 float g_right[] = {
-    -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f,
-     0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  1.0f,
-     0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,
-     0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,
-    -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  0.0f,
-    -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f
+    -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f, 0.f, 0.f, 0.f, 0.f,
+     0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  1.0f, 0.f, 0.f, 0.f, 0.f,
+     0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f, 0.f, 0.f, 0.f, 0.f,
+     0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f, 0.f, 0.f, 0.f, 0.f,
+    -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  0.0f, 0.f, 0.f, 0.f, 0.f,
+    -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f, 0.f, 0.f, 0.f, 0.f
 };
 
 float g_front[] = {
-    -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  0.0f,
-    -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
-    -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  1.0f,
-    -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  1.0f,
-    -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
-    -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  0.0f
+    -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  0.0f, 0.f, 0.f, 0.f, 0.f,
+    -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f, 0.f, 0.f, 0.f, 0.f,
+    -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  1.0f, 0.f, 0.f, 0.f, 0.f,
+    -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  1.0f, 0.f, 0.f, 0.f, 0.f,
+    -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  1.0f, 0.f, 0.f, 0.f, 0.f,
+    -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  0.0f, 0.f, 0.f, 0.f, 0.f
 };
 
 float g_back[] = {
-    0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  1.0f,
-    0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
-    0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  0.0f,
-    0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  0.0f,
-    0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
-    0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  1.0f
+    0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  1.0f, 0.f, 0.f, 0.f, 0.f,
+    0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f, 0.f, 0.f, 0.f, 0.f,
+    0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  0.0f, 0.f, 0.f, 0.f, 0.f,
+    0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  0.0f, 0.f, 0.f, 0.f, 0.f,
+    0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  1.0f, 0.f, 0.f, 0.f, 0.f,
+    0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  1.0f, 0.f, 0.f, 0.f, 0.f
 };
 
 float g_bottom[] = {
-    -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f,
-     0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  1.0f,
-     0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  0.0f,
-     0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  0.0f,
-    -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  0.0f,
-    -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f
+    -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f, 0.f, 0.f, 0.f, 0.f,
+     0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  1.0f, 0.f, 0.f, 0.f, 0.f,
+     0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  0.0f, 0.f, 0.f, 0.f, 0.f,
+     0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  0.0f, 0.f, 0.f, 0.f, 0.f,
+    -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  0.0f, 0.f, 0.f, 0.f, 0.f,
+    -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f, 0.f, 0.f, 0.f, 0.f
 };
 
 float g_top[] = {
-     0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,
-     0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  1.0f,
-    -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f,
-    -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f,
-    -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  0.0f,
-     0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f
+     0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f, 0.f, 0.f, 0.f, 0.f,
+     0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  1.0f, 0.f, 0.f, 0.f, 0.f,
+    -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f, 0.f, 0.f, 0.f, 0.f,
+    -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f, 0.f, 0.f, 0.f, 0.f,
+    -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  0.0f, 0.f, 0.f, 0.f, 0.f,
+     0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f, 0.f, 0.f, 0.f, 0.f
 };
 
 struct CubeTexture *ct_alloc(vec2 top, vec2 bot, vec2 side)
@@ -95,7 +95,7 @@ void chunk_free(struct Chunk *c)
 }
 
 
-void chunk_visible_verts(struct Chunk *c, struct Camera *cam, float **vertbuffer, size_t *count, size_t *capacity)
+void chunk_visible_verts(struct Chunk *c, struct Camera *cam, float **vertbuffer, size_t *count, size_t *capacity, ivec3 selected)
 {
     vec3 cpos;
     glm_vec3_sub(cam->pos, c->pos, cpos);
@@ -114,37 +114,37 @@ void chunk_visible_verts(struct Chunk *c, struct Camera *cam, float **vertbuffer
                 if (y < cpos[1])
                 {
                     if (!chunk_get(c, (ivec3){ x, y + 1, z }, false))
-                        chunk_face_at(c, pos, vertbuffer, count, capacity, g_top);
+                        chunk_face_at(c, pos, vertbuffer, count, capacity, g_top, selected);
                 }
 
                 if (y > cpos[1])
                 {
                     if (!chunk_get(c, (ivec3){ x, y - 1, z }, false))
-                        chunk_face_at(c, pos, vertbuffer, count, capacity, g_bottom);
+                        chunk_face_at(c, pos, vertbuffer, count, capacity, g_bottom, selected);
                 }
 
                 if (x < cpos[0])
                 {
                     if (!chunk_get(c, (ivec3){ x + 1, y, z }, false))
-                        chunk_face_at(c, pos, vertbuffer, count, capacity, g_back);
+                        chunk_face_at(c, pos, vertbuffer, count, capacity, g_back, selected);
                 }
 
                 if (x > cpos[0])
                 {
                     if (!chunk_get(c, (ivec3){ x - 1, y, z }, false))
-                        chunk_face_at(c, pos, vertbuffer, count, capacity, g_front);
+                        chunk_face_at(c, pos, vertbuffer, count, capacity, g_front, selected);
                 }
 
                 if (z < cpos[2])
                 {
                     if (!chunk_get(c, (ivec3){ x, y, z + 1 }, false))
-                        chunk_face_at(c, pos, vertbuffer, count, capacity, g_right);
+                        chunk_face_at(c, pos, vertbuffer, count, capacity, g_right, selected);
                 }
 
                 if (z > cpos[2])
                 {
                     if (!chunk_get(c, (ivec3){ x, y, z - 1 }, false))
-                        chunk_face_at(c, pos, vertbuffer, count, capacity, g_left);
+                        chunk_face_at(c, pos, vertbuffer, count, capacity, g_left, selected);
                 }
             }
         }
@@ -152,20 +152,20 @@ void chunk_visible_verts(struct Chunk *c, struct Camera *cam, float **vertbuffer
 }
 
 
-void chunk_face_at(struct Chunk *c, ivec3 pos, float **verts, size_t *nverts, size_t *capacity, float *face)
+void chunk_face_at(struct Chunk *c, ivec3 pos, float **verts, size_t *nverts, size_t *capacity, float *face, ivec3 selected)
 {
     int block = c->grid[pos[0]][pos[1]][pos[2]];
     if (!block)
         return;
 
-    if (*nverts + 48 >= *capacity)
+    if (*nverts + 72 >= *capacity)
     {
-        *capacity += 48000;
+        *capacity += 72000;
         *verts = realloc(*verts, sizeof(float) * *capacity);
     }
 
     float *arr = *verts;
-    memcpy(&arr[*nverts], face, 48 * sizeof(float));
+    memcpy(&arr[*nverts], face, 72 * sizeof(float));
 
     struct CubeTexture *tex = world_get_tex(c->world, block);
 
@@ -177,7 +177,7 @@ void chunk_face_at(struct Chunk *c, ivec3 pos, float **verts, size_t *nverts, si
 
     float adjust = 1.f / 500.f;
 
-    for (size_t i = *nverts; i < *nverts + 48; i += 8)
+    for (size_t i = *nverts; i < *nverts + 72; i += 12)
     {
         // Position
         arr[i] += c->pos[0] + pos[0];
@@ -187,9 +187,16 @@ void chunk_face_at(struct Chunk *c, ivec3 pos, float **verts, size_t *nverts, si
         // Texture coords
         arr[i + 6] = arr[i + 6] ? coords[0] + 100.f / 500.f - adjust : coords[0] + adjust;
         arr[i + 7] = arr[i + 7] ? coords[1] + 100.f / 500.f - adjust : coords[1] + adjust;
+
+        // Color
+        if (pos[0] == selected[0] && pos[1] == selected[1] && pos[2] == selected[2])
+        {
+            arr[i + 8] = 1.f;
+            arr[i + 11] = 0.5f;
+        }
     }
 
-    *nverts += 48;
+    *nverts += 72;
 }
 
 
