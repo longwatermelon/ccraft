@@ -114,7 +114,7 @@ void prog_mainloop(struct Prog *p)
         ivec3 coords;
         float dist = world_cast_ray(p->world, p->player->cam, &c, coords);
 
-        if (dist > 8.f)
+        if (dist > PLAYER_REACH)
             coords[0] = -1; // Don't highlight any block
 
         glClearColor(0.f, 0.f, 0.f, 1.f);
@@ -203,7 +203,7 @@ void prog_events(struct Prog *p)
         ivec3 coords;
         float dist = world_cast_ray(p->world, p->player->cam, &c, coords);
 
-        if (dist < 8.f)
+        if (dist < PLAYER_REACH)
         {
             c->grid[coords[0]][coords[1]][coords[2]] = 0;
             chunk_update_blockstates(c);

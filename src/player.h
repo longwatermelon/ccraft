@@ -4,6 +4,8 @@
 #include "camera.h"
 #include "world.h"
 
+#define PLAYER_REACH 8.f
+
 struct Player
 {
     struct Camera *cam;
