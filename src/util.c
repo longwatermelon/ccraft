@@ -69,3 +69,20 @@ void util_eul2quat(vec3 rot, vec4 dest)
     dest[2] = cr * cp * sy - sr * sp * cy;
 }
 
+
+float util_restrict_angle(float angle)
+{
+    while (angle < 0.f) angle += 2.f * M_PI;
+    while (angle > 2.f * M_PI) angle -= 2.f * M_PI;
+
+    return angle;
+}
+
+
+void util_restrict_vangle(vec3 in, vec3 out)
+{
+    out[0] = util_restrict_angle(in[0]);
+    out[1] = util_restrict_angle(in[1]);
+    out[2] = util_restrict_angle(in[2]);
+}
+

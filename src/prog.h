@@ -16,6 +16,8 @@ struct Prog
     struct Player *player;
 
     struct Skybox *skybox;
+
+    unsigned int crosshair_vao, crosshair_vb;
 };
 
 struct Prog *prog_alloc(GLFWwindow *win);

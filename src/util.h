@@ -14,5 +14,9 @@ char *util_read_file(const char *path);
 void util_quat_from_rot(vec3 rot, vec4 dest);
 void util_eul2quat(vec3 rot, vec4 dest);
 
+float util_restrict_angle(float angle);
+// out: out
+void util_restrict_vangle(vec3 in, vec3 out);
+
 #endif
 

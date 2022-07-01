@@ -7,7 +7,8 @@
 enum
 {
     SHADER_BASIC,
-    SHADER_SKYBOX
+    SHADER_SKYBOX,
+    SHADER_COLOR
 };
 
 typedef struct

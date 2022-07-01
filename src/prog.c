@@ -16,10 +16,35 @@ struct Prog *prog_alloc(GLFWwindow *win)
     p->ri = ri_alloc();
     ri_add_shader(p->ri, "shaders/basic_v.glsl", "shaders/basic_f.glsl");
     ri_add_shader(p->ri, "shaders/skybox_v.glsl", "shaders/skybox_f.glsl");
+    ri_add_shader(p->ri, "shaders/color_v.glsl", "shaders/color_f.glsl");
 
     p->ri->cam = p->player->cam;
 
     p->skybox = skybox_alloc("res/skybox/");
+
+    glGenVertexArrays(1, &p->crosshair_vao);
+    glBindVertexArray(p->crosshair_vao);
+
+    glGenBuffers(1, &p->crosshair_vb);
+    glBindBuffer(GL_ARRAY_BUFFER, p->crosshair_vb);
+
+    float verts[] = {
+        0.f, .02f * (4.f / 3.f), 0.f, 0.f, 0.f,
+        0.f, -.02f * (4.f / 3.f), 0.f, 0.f, 0.f,
+        -.02f, 0.f, 0.f, 0.f, 0.f,
+        .02f, 0.f, 0.f, 0.f, 0.f
+    };
+
+    glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), 0);
+    glEnableVertexAttribArray(0);
+
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(2 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+
+    glBindVertexArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     return p;
 }
@@ -27,6 +52,9 @@ struct Prog *prog_alloc(GLFWwindow *win)
 
 void prog_free(struct Prog *p)
 {
+    glDeleteVertexArrays(1, &p->crosshair_vao);
+    glDeleteBuffers(1, &p->crosshair_vb);
+
     player_free(p->player);
     skybox_free(p->skybox);
 
@@ -62,6 +90,8 @@ void prog_mainloop(struct Prog *p)
         prev_mx = mx;
         prev_my = my;
 
+        /* printf("%f %f %f\n", p->player->cam->rot[0], p->player->cam->rot[1], p->player->cam->rot[2]); */
+
         prog_events(p);
 
         if (p->player->vel[1] < -.2f)
@@ -71,6 +101,7 @@ void prog_mainloop(struct Prog *p)
 
         glm_perspective(glm_rad(fmin(p->ri->fov, 150.f)), 800.f / 600.f, .1f, 1000.f, p->ri->proj);
 
+        player_cast_ray(p->player, w);
         player_update(p->player, w);
 
         world_gen_chunks(w, p->player->cam->pos);
@@ -88,6 +119,11 @@ void prog_mainloop(struct Prog *p)
 
         /* glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); */
         world_render(w, p->ri);
+
+        ri_use_shader(p->ri, SHADER_COLOR);
+        glBindVertexArray(p->crosshair_vao);
+        glDrawArrays(GL_LINES, 0, 4);
+        glBindVertexArray(0);
 
         glfwSwapBuffers(p->win);
         glfwPollEvents();
