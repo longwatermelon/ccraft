@@ -101,7 +101,6 @@ void prog_mainloop(struct Prog *p)
 
         glm_perspective(glm_rad(fmin(p->ri->fov, 150.f)), 800.f / 600.f, .1f, 1000.f, p->ri->proj);
 
-        player_cast_ray(p->player, w);
         player_update(p->player, w);
 
         world_gen_chunks(w, p->player->cam->pos);
