@@ -13,8 +13,8 @@ struct Prog
     GLFWwindow *win;
     RenderInfo *ri;
 
+    struct World *world;
     struct Player *player;
-
     struct Skybox *skybox;
 
     unsigned int crosshair_vao, crosshair_vb;

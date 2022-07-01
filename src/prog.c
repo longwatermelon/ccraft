@@ -11,6 +11,7 @@ struct Prog *prog_alloc(GLFWwindow *win)
     struct Prog *p = malloc(sizeof(struct Prog));
     p->win = win;
 
+    p->world = world_alloc();
     p->player = player_alloc();
 
     p->ri = ri_alloc();
@@ -57,6 +58,7 @@ void prog_free(struct Prog *p)
 
     player_free(p->player);
     skybox_free(p->skybox);
+    world_free(p->world);
 
     ri_free(p->ri);
     free(p);
@@ -73,8 +75,6 @@ void prog_mainloop(struct Prog *p)
 
     double prev_mx, prev_my;
     glfwGetCursorPos(p->win, &prev_mx, &prev_my);
-
-    struct World *w = world_alloc();
 
     /* float prev = glfwGetTime(); */
 
@@ -103,24 +103,24 @@ void prog_mainloop(struct Prog *p)
 
         glm_perspective(glm_rad(fmin(p->ri->fov, 150.f)), 800.f / 600.f, .1f, 1000.f, p->ri->proj);
 
-        player_update(p->player, w);
+        player_update(p->player, p->world);
 
-        world_gen_chunks(w, p->player->cam->pos);
+        world_gen_chunks(p->world, p->player->cam->pos);
 
-        struct Chunk *c;
-        ivec3 coords;
-        float dist;
-        if ((dist = world_cast_ray(w, p->player->cam, &c, coords)) != INFINITY)
-        {
-            if (c)
-            {
-                /* printf("%f %f %f %f\n", dist, p->player->cam->pos[0], p->player->cam->pos[1], p->player->cam->pos[2]); */
-                c->grid[coords[0]][coords[1]][coords[2]] = 0;
-                /* printf("%d %d %d\n", coords[0], coords[1], coords[2]); */
-                chunk_update_blockstates(c);
-                chunk_find_highest(c);
-            }
-        }
+        /* struct Chunk *c; */
+        /* ivec3 coords; */
+        /* float dist; */
+        /* if ((dist = world_cast_ray(w, p->player->cam, &c, coords)) != INFINITY) */
+        /* { */
+        /*     if (c) */
+        /*     { */
+        /*         /1* printf("%f %f %f %f\n", dist, p->player->cam->pos[0], p->player->cam->pos[1], p->player->cam->pos[2]); *1/ */
+        /*         c->grid[coords[0]][coords[1]][coords[2]] = 0; */
+        /*         /1* printf("%d %d %d\n", coords[0], coords[1], coords[2]); *1/ */
+        /*         chunk_update_blockstates(c); */
+        /*         chunk_find_highest(c); */
+        /*     } */
+        /* } */
 
 
         glClearColor(0.f, 0.f, 0.f, 1.f);
@@ -135,7 +135,7 @@ void prog_mainloop(struct Prog *p)
         cam_view_mat(p->player->cam, p->ri->view);
 
         /* glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); */
-        world_render(w, p->ri);
+        world_render(p->world, p->ri);
 
         ri_use_shader(p->ri, SHADER_COLOR);
         glBindVertexArray(p->crosshair_vao);
@@ -145,8 +145,6 @@ void prog_mainloop(struct Prog *p)
         glfwSwapBuffers(p->win);
         glfwPollEvents();
     }
-
-    world_free(w);
 }
 
 
@@ -199,6 +197,23 @@ void prog_events(struct Prog *p)
     {
         if (p->player->vel[1] == 0.f)
             p->player->vel[1] = .2f;
+    }
+
+    static float last_lmb = 0.f;
+
+    if (glfwGetMouseButton(p->win, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS && glfwGetTime() - last_lmb > .5f)
+    {
+        last_lmb = glfwGetTime();
+
+        struct Chunk *c;
+        ivec3 coords;
+        float dist = world_cast_ray(p->world, p->player->cam, &c, coords);
+
+        if (dist < INFINITY)
+        {
+            c->grid[coords[0]][coords[1]][coords[2]] = 0;
+            chunk_update_blockstates(c);
+        }
     }
 
 /*     if (glfwGetKey(p->win, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) p->cam->pos[1] -= move; */
