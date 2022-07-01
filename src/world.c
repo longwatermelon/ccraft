@@ -198,12 +198,17 @@ int world_get_block(struct World *w, vec3 pos, struct Chunk **chunk, ivec3 index
 
 float world_cast_ray(struct World *w, struct Camera *cam, struct Chunk **chunk, ivec3 coords)
 {
+    float tmp = cam->rot[2];
+    cam->rot[2] = 2.f * M_PI - cam->rot[2];
+
     ivec3 x, y, z;
     struct Chunk *cx, *cy, *cz;
 
     float dx = world_cast_rayx(w, cam, &cx, x);
     float dy = world_cast_rayy(w, cam, &cy, y);
     float dz = world_cast_rayz(w, cam, &cz, z);
+
+    cam->rot[2] = tmp;
 
     ivec3 *c;
     float min = dx;
@@ -238,7 +243,7 @@ float world_cast_rayx(struct World *w, struct Camera *cam, struct Chunk **c, ive
 
     float a = (ray[0] - cam->pos[0]) / cosf(cam->rot[2]);
     ray[1] = cam->pos[1] + a * tanf(cam->rot[1]);
-    ray[2] = cam->pos[2] - a * sinf(cam->rot[2]);
+    ray[2] = cam->pos[2] + a * sinf(cam->rot[2]);
 
     int depth = 0;
     while (depth < 8)
@@ -249,7 +254,7 @@ float world_cast_rayx(struct World *w, struct Camera *cam, struct Chunk **c, ive
         ray[0] += facing_forwards ? 1 : -1;
         a = (ray[0] - cam->pos[0]) / cosf(cam->rot[2]);
         ray[1] = cam->pos[1] + a * tanf(cam->rot[1]);
-        ray[2] = cam->pos[2] - a * sinf(cam->rot[2]);
+        ray[2] = cam->pos[2] + a * sinf(cam->rot[2]);
 
         ++depth;
     }
@@ -267,7 +272,7 @@ float world_cast_rayy(struct World *w, struct Camera *cam, struct Chunk **c, ive
 
     float a = (ray[1] - cam->pos[1]) / tanf(cam->rot[1]);
     ray[0] = cam->pos[0] + a * cosf(cam->rot[2]);
-    ray[2] = cam->pos[2] - a * sinf(cam->rot[2]);
+    ray[2] = cam->pos[2] + a * sinf(cam->rot[2]);
 
     int depth = 0;
     while (depth < 8)
@@ -278,7 +283,7 @@ float world_cast_rayy(struct World *w, struct Camera *cam, struct Chunk **c, ive
         ray[1] += facing_up ? 1 : -1;
         a = (ray[1] - cam->pos[1]) / tanf(cam->rot[1]);
         ray[0] = cam->pos[0] + a * cosf(cam->rot[2]);
-        ray[2] = cam->pos[2] - a * sinf(cam->rot[2]);
+        ray[2] = cam->pos[2] + a * sinf(cam->rot[2]);
 
         ++depth;
     }
@@ -290,9 +295,6 @@ float world_cast_rayy(struct World *w, struct Camera *cam, struct Chunk **c, ive
 float world_cast_rayz(struct World *w, struct Camera *cam, struct Chunk **c, ivec3 coords)
 {
     vec3 ray;
-    float tmp = cam->rot[2];
-    cam->rot[2] = 2.f * M_PI - cam->rot[2];
-    util_restrict_angle(cam->rot[2]);
 
     bool facing_right = cam->rot[2] < M_PI;
     ray[2] = (int)cam->pos[2] + (facing_right ? 1 : 0);
@@ -305,10 +307,7 @@ float world_cast_rayz(struct World *w, struct Camera *cam, struct Chunk **c, ive
     while (depth < 8)
     {
         if (world_get_block(w, ray, c, coords))
-        {
-            cam->rot[2] = tmp;
             return glm_vec3_distance(ray, cam->pos);
-        }
 
         ray[2] += facing_right ? 1 : -1;
         a = (ray[2] - cam->pos[2]) / sinf(cam->rot[2]);
@@ -318,7 +317,6 @@ float world_cast_rayz(struct World *w, struct Camera *cam, struct Chunk **c, ive
         ++depth;
     }
 
-    cam->rot[2] = tmp;
     return INFINITY;
 }
 
