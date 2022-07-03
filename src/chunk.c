@@ -192,6 +192,8 @@ void chunk_face_at(struct Chunk *c, ivec3 pos, float **verts, size_t *nverts, si
         if (pos[0] == selected[0] && pos[1] == selected[1] && pos[2] == selected[2])
         {
             arr[i + 8] = 1.f;
+            arr[i + 9] = 1.f;
+            arr[i + 10] = 1.f;
             arr[i + 11] = 0.5f;
         }
     }
