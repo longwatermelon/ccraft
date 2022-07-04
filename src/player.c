@@ -63,8 +63,6 @@ void player_check_collisions(struct Player *p, struct World *w, vec3 pos)
         }
     }
 
-    printf("%f %f\n", pos[0], pos[2]);
-
     // Horizontal collision x
     int sigx = p->vel[0] < 0 ? -1 : 1;
 
