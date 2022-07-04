@@ -232,7 +232,7 @@ float world_cast_ray(struct World *w, struct Camera *cam, struct Chunk **chunk, 
     float dy = world_cast_rayy(w, cam, &cy, y);
     float dz = world_cast_rayz(w, cam, &cz, z);
 
-    dx = INFINITY;
+    dy = INFINITY;
     dz = INFINITY;
 
     cam->rot[2] = tmp;
@@ -276,8 +276,12 @@ float world_cast_rayx(struct World *w, struct Camera *cam, struct Chunk **c, ive
     int depth = 0;
     while (depth < 8)
     {
+        if (!facing_forwards) ray[0] -= 1.f;
+
         if (world_get_block(w, ray, c, coords))
             return glm_vec3_distance(ray, cam->pos);
+
+        if (!facing_forwards) ray[0] += 1.f;
 
         ray[0] += facing_forwards ? 1 : -1;
         a = (ray[0] - cam->pos[0]) / cosf(cam->rot[2]);
