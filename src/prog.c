@@ -126,7 +126,7 @@ void prog_mainloop(struct Prog *p)
         ri_use_shader(p->ri, SHADER_BASIC);
 
         player_set_props(p->player, p->ri->shader);
-        cam_view_mat(p->player->cam, p->ri->view);
+        player_view(p->player, p->ri->view);
 
         /* glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); */
         world_render(p->world, p->ri, coords);

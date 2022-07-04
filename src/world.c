@@ -155,20 +155,12 @@ int world_get_block(struct World *w, vec3 pos, struct Chunk **chunk, ivec3 index
     vec3 fcoords;
     glm_vec3_sub(pos, center, fcoords);
 
-    int sigx = fcoords[0] < 0 ? -1 : 1;
-    int sigz = fcoords[2] < 0 ? -1 : 1;
-
-    ivec3 coords = { fcoords[0] + .5f * sigx, pos[1], fcoords[2] + .5f * sigz };
-
-    ivec3 idx = {
-        coords[0] / 16 - (coords[0] < 0 && coords[0] % 16 != 0 ? 1 : 0),
-        coords[1],
-        coords[2] / 16 - (coords[2] < 0 && coords[2] % 16 != 0 ? 1 : 0)
-    };
+    vec3 from_left_corner;
+    glm_vec3_sub(pos, w->chunks[0][0]->pos, from_left_corner);
 
     ivec2 chunk_index = {
-        idx[0] + RENDER_DISTANCE / 2,
-        idx[2] + RENDER_DISTANCE / 2
+        (int)(from_left_corner[0] / 16.f),
+        (int)(from_left_corner[2] / 16.f)
     };
 
     if (chunk_index[0] < 0 || chunk_index[0] >= RENDER_DISTANCE ||
@@ -180,19 +172,47 @@ int world_get_block(struct World *w, vec3 pos, struct Chunk **chunk, ivec3 index
     struct Chunk *c = w->chunks[chunk_index[0]][chunk_index[1]];
     if (chunk) *chunk = c;
 
-    ivec2 block_idx = {
-        coords[0] - (coords[0] / 16 * 16 - ((coords[0] < 0 && coords[0] % 16 != 0) ? 16 : 0)),
-        coords[2] - (coords[2] / 16 * 16 - ((coords[2] < 0 && coords[2] % 16 != 0) ? 16 : 0)),
+    ivec3 block_index = {
+        (int)from_left_corner[0] - (chunk_index[0] * 16),
+        (int)pos[1],
+        (int)from_left_corner[2] - (chunk_index[1] * 16)
     };
 
     if (index)
-    {
-        index[0] = block_idx[0];
-        index[1] = coords[1];
-        index[2] = block_idx[1];
-    }
+        memcpy(index, block_index, 3 * sizeof(int));
 
-    return c->grid[block_idx[0]][coords[1]][block_idx[1]];
+    return chunk_get(c, block_index, true);
+
+    /* ivec3 coords = { fcoords[0], pos[1], fcoords[2] }; */
+
+    /* ivec3 idx = { */
+    /*     coords[0] / 16 - (coords[0] < 0 && coords[0] % 16 != 0 ? 1 : 0), */
+    /*     coords[1], */
+    /*     coords[2] / 16 - (coords[2] < 0 && coords[2] % 16 != 0 ? 1 : 0) */
+    /* }; */
+
+    /* ivec2 chunk_index = { */
+    /*     idx[0] + RENDER_DISTANCE / 2, */
+    /*     idx[2] + RENDER_DISTANCE / 2 */
+    /* }; */
+
+
+    /* struct Chunk *c = w->chunks[chunk_index[0]][chunk_index[1]]; */
+    /* if (chunk) *chunk = c; */
+
+    /* ivec2 block_idx = { */
+    /*     coords[0] - (coords[0] / 16 * 16 - ((coords[0] < 0 && coords[0] % 16 != 0) ? 16 : 0)), */
+    /*     coords[2] - (coords[2] / 16 * 16 - ((coords[2] < 0 && coords[2] % 16 != 0) ? 16 : 0)), */
+    /* }; */
+
+    /* if (index) */
+    /* { */
+    /*     index[0] = block_idx[0]; */
+    /*     index[1] = coords[1]; */
+    /*     index[2] = block_idx[1]; */
+    /* } */
+
+    /* return c->grid[block_idx[0]][coords[1]][block_idx[1]]; */
 }
 
 
