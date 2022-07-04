@@ -1,5 +1,6 @@
 #include "world.h"
 #include "util.h"
+#include "player.h"
 #include <string.h>
 #include <glad/glad.h>
 
@@ -221,6 +222,9 @@ float world_cast_ray(struct World *w, struct Camera *cam, struct Chunk **chunk, 
     float tmp = cam->rot[2];
     cam->rot[2] = 2.f * M_PI - cam->rot[2];
 
+    float cam_h = cam->pos[1];
+    cam->pos[1] -= PLAYER_EYE_OFFSET;
+
     ivec3 x, y, z;
     struct Chunk *cx, *cy, *cz;
 
@@ -228,7 +232,11 @@ float world_cast_ray(struct World *w, struct Camera *cam, struct Chunk **chunk, 
     float dy = world_cast_rayy(w, cam, &cy, y);
     float dz = world_cast_rayz(w, cam, &cz, z);
 
+    dx = INFINITY;
+    dz = INFINITY;
+
     cam->rot[2] = tmp;
+    cam->pos[1] = cam_h;
 
     ivec3 *c;
     float min = dx;
@@ -297,8 +305,12 @@ float world_cast_rayy(struct World *w, struct Camera *cam, struct Chunk **c, ive
     int depth = 0;
     while (depth < 8)
     {
+        if (!facing_up) ray[1] -= 1.f;
+
         if (world_get_block(w, ray, c, coords))
             return glm_vec3_distance(ray, cam->pos);
+
+        if (!facing_up) ray[1] += 1.f;
 
         ray[1] += facing_up ? 1 : -1;
         a = (ray[1] - cam->pos[1]) / tanf(cam->rot[1]);
