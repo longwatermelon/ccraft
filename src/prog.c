@@ -95,6 +95,15 @@ void prog_mainloop(struct Prog *p)
 
         util_restrict_vangle(p->player->cam->rot, p->player->cam->rot);
 
+        // Restrict y
+        float cam_rot_y = p->player->cam->rot[1];
+
+        if (cam_rot_y < 3.f * M_PI / 2.f && cam_rot_y > M_PI / 2.f)
+        {
+            if (cam_rot_y < M_PI) p->player->cam->rot[1] = M_PI / 2.f;
+            else p->player->cam->rot[1] = 3.f * M_PI / 2.f;
+        }
+
         /* printf("%f %f %f\n", p->player->cam->rot[0], p->player->cam->rot[1], p->player->cam->rot[2]); */
 
         prog_events(p);
