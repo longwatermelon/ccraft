@@ -6,6 +6,13 @@
 
 #define RENDER_DISTANCE 12
 
+enum
+{
+    RAYI_X,
+    RAYI_Y,
+    RAYI_Z
+};
+
 struct World
 {
     struct Chunk *chunks[RENDER_DISTANCE][RENDER_DISTANCE];
@@ -32,7 +39,7 @@ struct CubeTexture *world_get_tex(struct World *w, int block);
 int world_get_block(struct World *w, vec3 pos, struct Chunk **chunk, ivec3 index);
 
 // out: coords
-float world_cast_ray(struct World *w, struct Camera *cam, struct Chunk **chunk, ivec3 coords);
+float world_cast_ray(struct World *w, struct Camera *cam, struct Chunk **chunk, ivec3 coords, int *type);
 float world_cast_rayx(struct World *w, struct Camera *cam, struct Chunk **c, ivec3 coords);
 float world_cast_rayy(struct World *w, struct Camera *cam, struct Chunk **c, ivec3 coords);
 float world_cast_rayz(struct World *w, struct Camera *cam, struct Chunk **c, ivec3 coords);

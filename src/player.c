@@ -113,6 +113,54 @@ void player_check_collisions(struct Player *p, struct World *w, vec3 pos)
 }
 
 
+void player_destroy_block(struct Player *p, struct World *w)
+{
+    struct Chunk *c;
+    ivec3 coords;
+    int type;
+    float dist = world_cast_ray(w, p->cam, &c, coords, &type);
+
+    if (dist < PLAYER_REACH)
+    {
+        c->grid[coords[0]][coords[1]][coords[2]] = 0;
+        chunk_update_blockstates(c);
+    }
+}
+
+
+void player_place_block(struct Player *p, struct World *w)
+{
+    struct Chunk *c;
+    ivec3 coords;
+    int type;
+    float dist = world_cast_ray(w, p->cam, &c, coords, &type);
+
+    if (dist < PLAYER_REACH)
+    {
+        bool facing_forwards = p->cam->rot[2] > 3.f * M_PI / 2.f || p->cam->rot[2] < M_PI / 2.f;
+        bool facing_up = p->cam->rot[1] < M_PI / 2.f;
+        bool facing_right = p->cam->rot[2] > M_PI;
+
+        switch (type)
+        {
+        case RAYI_X:
+            coords[0] += facing_forwards ? -1 : 1;
+            break;
+        case RAYI_Y:
+            coords[1] += facing_up ? -1 : 1;
+            break;
+        case RAYI_Z:
+            coords[2] += facing_right ? -1 : 1;
+            break;
+        }
+
+        c->grid[coords[0]][coords[1]][coords[2]] = BLOCK_DIRT;
+        chunk_find_highest(c);
+        chunk_update_blockstates(c);
+    }
+}
+
+
 void player_set_props(struct Player *p, unsigned int shader)
 {
     cam_set_props(p->cam, shader);

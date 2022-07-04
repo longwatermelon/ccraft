@@ -28,6 +28,7 @@ enum
     BSTATE_ENCLOSED
 };
 
+
 struct CubeTexture
 {
     vec2 top, bottom, side;

@@ -112,7 +112,8 @@ void prog_mainloop(struct Prog *p)
 
         struct Chunk *c;
         ivec3 coords;
-        float dist = world_cast_ray(p->world, p->player->cam, &c, coords);
+        int type;
+        float dist = world_cast_ray(p->world, p->player->cam, &c, coords, &type);
 
         if (dist > PLAYER_REACH)
             coords[0] = -1; // Don't highlight any block
@@ -194,20 +195,18 @@ void prog_events(struct Prog *p)
     }
 
     static float last_lmb = 0.f;
+    static float last_rmb = 0.f;
 
     if (glfwGetMouseButton(p->win, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS && glfwGetTime() - last_lmb > .3f)
     {
         last_lmb = glfwGetTime();
+        player_destroy_block(p->player, p->world);
+    }
 
-        struct Chunk *c;
-        ivec3 coords;
-        float dist = world_cast_ray(p->world, p->player->cam, &c, coords);
-
-        if (dist < PLAYER_REACH)
-        {
-            c->grid[coords[0]][coords[1]][coords[2]] = 0;
-            chunk_update_blockstates(c);
-        }
+    if (glfwGetMouseButton(p->win, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS && glfwGetTime() - last_rmb > .3f)
+    {
+        last_rmb = glfwGetTime();
+        player_place_block(p->player, p->world);
     }
 
 /*     if (glfwGetKey(p->win, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) p->cam->pos[1] -= move; */

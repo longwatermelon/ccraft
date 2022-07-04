@@ -217,7 +217,7 @@ int world_get_block(struct World *w, vec3 pos, struct Chunk **chunk, ivec3 index
 }
 
 
-float world_cast_ray(struct World *w, struct Camera *cam, struct Chunk **chunk, ivec3 coords)
+float world_cast_ray(struct World *w, struct Camera *cam, struct Chunk **chunk, ivec3 coords, int *type)
 {
     float tmp = cam->rot[2];
     cam->rot[2] = 2.f * M_PI - cam->rot[2];
@@ -242,12 +242,14 @@ float world_cast_ray(struct World *w, struct Camera *cam, struct Chunk **chunk, 
     float min = dx;
     c = &x;
     *chunk = cx;
+    *type = RAYI_X;
 
     if (dy < min)
     {
         min = dy;
         c = &y;
         *chunk = cy;
+        *type = RAYI_Y;
     }
 
     if (dz < min)
@@ -255,6 +257,7 @@ float world_cast_ray(struct World *w, struct Camera *cam, struct Chunk **chunk, 
         min = dz;
         c = &z;
         *chunk = cz;
+        *type = RAYI_Z;
     }
 
     memcpy(coords, *c, 3 * sizeof(int));
