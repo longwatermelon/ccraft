@@ -24,6 +24,9 @@ struct World
 
     float *vertbuffer;
     size_t vertbuffer_size;
+
+    struct Chunk *back_left;
+    size_t cz, cx; // Measured in chunks (z len, x len)
 };
 
 struct World *world_alloc();
@@ -47,8 +50,20 @@ float world_cast_rayz(struct World *w, struct Camera *cam, struct Chunk **c, ive
 void world_center(struct World *w, vec3 dest);
 
 void world_gen_chunks(struct World *w, vec3 cam);
+void world_gen_chunks_front(struct World *w);
+void world_gen_chunks_back(struct World *w);
+void world_gen_chunks_left(struct World *w);
+void world_gen_chunks_right(struct World *w);
+
+// Connects chunks together only inside of w->chunks
+void world_connect_chunks(struct World *w);
+// Fill w->chunks starting with back_left at [0][0].
+void world_fill_chunk_array(struct World *w, struct Chunk *back_left);
 
 void world_init_renderer();
+
+// Start from w->back_left, move <x> along x axis and <z> along z axis
+struct Chunk *world_get_chunk(struct World *w, int x, int z);
 
 #endif
 

@@ -46,6 +46,8 @@ struct Chunk
     int block_states[16][256][16];
 
     struct World *world;
+
+    struct Chunk *front, *back, *left, *right;
 };
 
 struct Chunk *chunk_alloc(struct World *w, vec3 pos);

@@ -83,6 +83,11 @@ struct Chunk *chunk_alloc(struct World *w, vec3 pos)
     glm_vec3_copy(pos, c->pos);
     c->world = w;
 
+    c->front = 0;
+    c->back = 0;
+    c->left = 0;
+    c->right = 0;
+
     chunk_gen_terrain(c);
 
     return c;

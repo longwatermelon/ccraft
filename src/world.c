@@ -29,6 +29,12 @@ struct World *world_alloc()
         }
     }
 
+    world_connect_chunks(w);
+    w->back_left = w->chunks[0][0];
+
+    w->cz = RENDER_DISTANCE;
+    w->cx = RENDER_DISTANCE;
+
     w->ntexs = 2;
     w->texs = malloc(sizeof(struct CubeTexture*) * w->ntexs);
     w->texs[0] = ct_alloc((vec2){ 0.f, 0.f }, (vec2){ 200.f, 0.f }, (vec3){ 100.f, 0.f });
@@ -397,27 +403,206 @@ void world_gen_chunks(struct World *w, vec3 cam)
 
     if (glm_vec3_distance(cam, center) > 16.f)
     {
-        vec3 move = {
-            diff[0] ? (diff[0] < 0 ? -16.f : 16.f) : 0,
-            0.f,
-            diff[2] ? (diff[2] < 0 ? -16.f : 16.f) : 0
-        };
+        struct Chunk *back_left = w->chunks[0][0];
 
-        for (int x = 0; x < RENDER_DISTANCE; ++x)
+        if (diff[0] > 0.f)
         {
-            for (int z = 0; z < RENDER_DISTANCE; ++z)
-            {
-                glm_vec3_add(w->chunks[x][z]->pos, move, w->chunks[x][z]->pos);
-                chunk_gen_terrain(w->chunks[x][z]);
-            }
+            world_gen_chunks_front(w);
+            back_left = back_left->front;
         }
 
-        for (int x = 0; x < RENDER_DISTANCE; ++x)
+        if (diff[0] < 0.f)
         {
-            for (int z = 0; z < RENDER_DISTANCE; ++z)
-            {
-                chunk_update_blockstates(w->chunks[x][z]);
-            }
+            world_gen_chunks_back(w);
+            back_left = back_left->back;
+        }
+
+        if (diff[2] < 0.f)
+        {
+            world_gen_chunks_left(w);
+            back_left = back_left->left;
+        }
+
+        if (diff[2] > 0.f)
+        {
+            world_gen_chunks_right(w);
+            back_left = back_left->right;
+        }
+
+        world_fill_chunk_array(w, back_left);
+
+        /* vec3 move = { */
+        /*     diff[0] ? (diff[0] < 0 ? -16.f : 16.f) : 0, */
+        /*     0.f, */
+        /*     diff[2] ? (diff[2] < 0 ? -16.f : 16.f) : 0 */
+        /* }; */
+
+        /* for (int x = 0; x < RENDER_DISTANCE; ++x) */
+        /* { */
+        /*     for (int z = 0; z < RENDER_DISTANCE; ++z) */
+        /*     { */
+        /*         glm_vec3_add(w->chunks[x][z]->pos, move, w->chunks[x][z]->pos); */
+        /*         chunk_gen_terrain(w->chunks[x][z]); */
+        /*     } */
+        /* } */
+
+        /* for (int x = 0; x < RENDER_DISTANCE; ++x) */
+        /* { */
+        /*     for (int z = 0; z < RENDER_DISTANCE; ++z) */
+        /*     { */
+        /*         chunk_update_blockstates(w->chunks[x][z]); */
+        /*     } */
+        /* } */
+    }
+}
+
+
+void world_gen_chunks_front(struct World *w)
+{
+    for (size_t z = 0; z < w->cz; ++z)
+    {
+        struct Chunk *c = world_get_chunk(w, w->cx - 1, z);
+
+        if (!c->front)
+        {
+            c->front = chunk_alloc(w, (vec3){
+                c->pos[0] + 16.f,
+                c->pos[1],
+                c->pos[2]
+            });
+        }
+    }
+
+    for (size_t z = 0; z < w->cz; ++z)
+    {
+        struct Chunk *c = world_get_chunk(w, w->cx - 1, z);
+
+        c->front->back = c;
+        if (c->left) c->front->left = c->left->front;
+        if (c->right) c->front->right = c->right->front;
+    }
+
+    ++w->cx;
+}
+
+
+void world_gen_chunks_back(struct World *w)
+{
+    for (size_t z = 0; z < w->cz; ++z)
+    {
+        struct Chunk *c = world_get_chunk(w, 0, z);
+
+        if (!c->back)
+        {
+            c->back = chunk_alloc(w, (vec3){
+                c->pos[0] - 16.f,
+                c->pos[1],
+                c->pos[2]
+            });
+        }
+    }
+
+    for (size_t z = 0; z < w->cz; ++z)
+    {
+        struct Chunk *c = world_get_chunk(w, 0, z);
+
+        c->back->front = c;
+        if (c->left) c->back->left = c->left->back;
+        if (c->right) c->back->right = c->right->back;
+    }
+
+    ++w->cx;
+    w->back_left = w->back_left->back;
+}
+
+
+void world_gen_chunks_left(struct World *w)
+{
+    for (size_t x = 0; x < w->cx; ++x)
+    {
+        struct Chunk *c = world_get_chunk(w, x, 0);
+
+        if (!c->left)
+        {
+            c->left = chunk_alloc(w, (vec3){
+                c->pos[0],
+                c->pos[1],
+                c->pos[2] - 16.f
+            });
+        }
+    }
+
+    for (size_t x = 0; x < w->cx; ++x)
+    {
+        struct Chunk *c = world_get_chunk(w, x, 0);
+
+        c->left->right = c;
+        if (c->front) c->left->front = c->front->left;
+        if (c->back) c->left->back = c->back->left;
+    }
+
+    ++w->cz;
+    w->back_left = w->back_left->left;
+}
+
+
+void world_gen_chunks_right(struct World *w)
+{
+    for (size_t x = 0; x < w->cx; ++x)
+    {
+        struct Chunk *c = world_get_chunk(w, x, w->cz - 1);
+
+        if (!c->right)
+        {
+            c->right = chunk_alloc(w, (vec3){
+                c->pos[0],
+                c->pos[1],
+                c->pos[2] + 16.f
+            });
+        }
+    }
+
+    for (size_t x = 0; x < w->cx; ++x)
+    {
+        struct Chunk *c = world_get_chunk(w, x, w->cz - 1);
+
+        c->right->left = c;
+        if (c->front) c->right->front = c->front->right;
+        if (c->back) c->right->back = c->back->right;
+    }
+
+    ++w->cz;
+}
+
+
+void world_connect_chunks(struct World *w)
+{
+    for (int x = 0; x < RENDER_DISTANCE; ++x)
+    {
+        for (int z = 0; z < RENDER_DISTANCE; ++z)
+        {
+            if (x > 0)                    w->chunks[x][z]->back = w->chunks[x - 1][z];
+            if (x < RENDER_DISTANCE - 1)  w->chunks[x][z]->front = w->chunks[x + 1][z];
+            if (z > 0)                    w->chunks[x][z]->left = w->chunks[x][z - 1];
+            if (z < RENDER_DISTANCE - 1)  w->chunks[x][z]->right = w->chunks[x][z + 1];
+        }
+    }
+}
+
+
+void world_fill_chunk_array(struct World *w, struct Chunk *back_left)
+{
+    struct Chunk *xbuf = back_left;
+
+    for (int x = 0; x < RENDER_DISTANCE; ++x)
+    {
+        if (x > 0 && x < RENDER_DISTANCE - 1) xbuf = xbuf->front;
+        struct Chunk *zbuf = xbuf;
+
+        for (int z = 0; z < RENDER_DISTANCE; ++z)
+        {
+            if (z > 0 && z < RENDER_DISTANCE - 1) zbuf = zbuf->right;
+            w->chunks[x][z] = zbuf;
         }
     }
 }
@@ -447,5 +632,25 @@ void world_init_renderer()
 
     glBindVertexArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
+
+
+struct Chunk *world_get_chunk(struct World *w, int x, int z)
+{
+    struct Chunk *c = w->back_left;
+
+    for (int i = 0; i < x; ++i)
+    {
+        c = c->front;
+        if (!c) return 0;
+    }
+
+    for (int i = 0; i < z; ++i)
+    {
+        c = c->right;
+        if (!c) return 0;
+    }
+
+    return c;
 }
 
