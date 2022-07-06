@@ -86,6 +86,7 @@ void prog_mainloop(struct Prog *p)
         /* printf("%f\n", 1.f / (glfwGetTime() - prev)); */
         /* prev = glfwGetTime(); */
 
+        // Camera movement
         double mx, my;
         glfwGetCursorPos(p->win, &mx, &my);
 
@@ -104,51 +105,64 @@ void prog_mainloop(struct Prog *p)
             else p->player->cam->rot[1] = 3.f * M_PI / 2.f;
         }
 
-        /* printf("%f %f %f\n", p->player->cam->rot[0], p->player->cam->rot[1], p->player->cam->rot[2]); */
-
-        prog_events(p);
-
-        if (p->player->vel[1] < -.2f)
-            p->ri->fov = 45.f + ((-p->player->vel[1] - .2f) * 50.f);
-        else
-            p->ri->fov += (45.f - p->ri->fov) / 5.f;
-
-        glm_perspective(glm_rad(fmin(p->ri->fov, 150.f)), 800.f / 600.f, .1f, 1000.f, p->ri->proj);
-
-        player_update(p->player, p->world);
-
-        world_gen_chunks(p->world, p->player->cam->pos);
-
-        struct Chunk *c;
-        ivec3 coords;
-        int type;
-        float dist = world_cast_ray(p->world, p->player->cam, &c, coords, &type);
-
-        if (dist > PLAYER_REACH)
-            coords[0] = -1; // Don't highlight any block
+        prog_update(p);
 
         glClearColor(0.f, 0.f, 0.f, 1.f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        ri_use_shader(p->ri, SHADER_SKYBOX);
-        skybox_render(p->skybox, p->ri);
-
-        ri_use_shader(p->ri, SHADER_BASIC);
-
-        player_set_props(p->player, p->ri->shader);
-        player_view(p->player, p->ri->view);
-
-        /* glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); */
-        world_render(p->world, p->ri, coords);
-
-        ri_use_shader(p->ri, SHADER_COLOR);
-        glBindVertexArray(p->crosshair_vao);
-        glDrawArrays(GL_LINES, 0, 4);
-        glBindVertexArray(0);
+        prog_render(p);
 
         glfwSwapBuffers(p->win);
         glfwPollEvents();
     }
+}
+
+
+void prog_update(struct Prog *p)
+{
+    prog_events(p);
+
+    if (p->player->vel[1] < -.2f)
+        p->ri->fov = 45.f + ((-p->player->vel[1] - .2f) * 50.f);
+    else
+        p->ri->fov += (45.f - p->ri->fov) / 5.f;
+
+    glm_perspective(glm_rad(fmin(p->ri->fov, 150.f)), 800.f / 600.f, .1f, 1000.f, p->ri->proj);
+
+    player_update(p->player, p->world);
+
+    world_gen_chunks(p->world, p->player->cam->pos);
+}
+
+
+void prog_render(struct Prog *p)
+{
+    // Skybox
+    ri_use_shader(p->ri, SHADER_SKYBOX);
+    skybox_render(p->skybox, p->ri);
+
+    // Scene
+    ri_use_shader(p->ri, SHADER_BASIC);
+
+    player_set_props(p->player, p->ri->shader);
+    player_view(p->player, p->ri->view);
+
+    // World
+    struct Chunk *c;
+    ivec3 coords;
+    int type;
+    float dist = world_cast_ray(p->world, p->player->cam, &c, coords, &type);
+
+    if (dist > PLAYER_REACH)
+        coords[0] = -1; // Don't highlight any block
+
+    world_render(p->world, p->ri, coords);
+
+    // Crosshair
+    ri_use_shader(p->ri, SHADER_COLOR);
+    glBindVertexArray(p->crosshair_vao);
+    glDrawArrays(GL_LINES, 0, 4);
+    glBindVertexArray(0);
 }
 
 

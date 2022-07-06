@@ -24,6 +24,8 @@ struct Prog *prog_alloc(GLFWwindow *win);
 void prog_free(struct Prog *p);
 
 void prog_mainloop(struct Prog *p);
+void prog_update(struct Prog *p);
+void prog_render(struct Prog *p);
 
 void prog_events(struct Prog *p);
 
