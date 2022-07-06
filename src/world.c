@@ -381,11 +381,13 @@ float world_cast_rayz(struct World *w, struct Camera *cam, struct Chunk **c, ive
 
 void world_center(struct World *w, vec3 dest)
 {
-    vec3 center = { 16.f, 0.f, 16.f };
-    glm_vec3_addadd(w->chunks[RENDER_DISTANCE - 1][RENDER_DISTANCE - 1]->pos, w->chunks[0][0]->pos, center);
-    glm_vec3_scale(center, .5f, center);
+    struct Chunk *c = w->chunks[RENDER_DISTANCE / 2][RENDER_DISTANCE / 2];
 
-    glm_vec3_copy(center, dest);
+    glm_vec3_copy((vec3){
+        c->pos[0] + 8.f,
+        0.f,
+        c->pos[2] + 8.f
+    }, dest);
 }
 
 
@@ -401,35 +403,92 @@ void world_gen_chunks(struct World *w, vec3 cam)
 
     diff[1] = 0.f;
 
-    if (glm_vec3_distance(cam, center) > 16.f)
+    /* if (glm_vec3_distance(cam, center) > 16.f) */
+    /* { */
+    struct Chunk *back_left = w->chunks[0][0];
+    bool shifted = false;
+    bool f = false, b = false, l = false, r = false;
+
+    if (diff[0] > 8.f)
     {
-        struct Chunk *back_left = w->chunks[0][0];
+        shifted = true;
+        f = true;
+        world_gen_chunks_front(w);
+        back_left = back_left->front;
+    }
 
-        if (diff[0] > 0.f)
-        {
-            world_gen_chunks_front(w);
-            back_left = back_left->front;
-        }
+    if (diff[0] < -8.f)
+    {
+        shifted = true;
+        b = true;
+        world_gen_chunks_back(w);
+        back_left = back_left->back;
+    }
 
-        if (diff[0] < 0.f)
-        {
-            world_gen_chunks_back(w);
-            back_left = back_left->back;
-        }
+    if (diff[2] < -8.f)
+    {
+        shifted = true;
+        l = true;
+        world_gen_chunks_left(w);
+        back_left = back_left->left;
+    }
 
-        if (diff[2] < 0.f)
-        {
-            world_gen_chunks_left(w);
-            back_left = back_left->left;
-        }
+    if (diff[2] > 8.f)
+    {
+        shifted = true;
+        r = true;
+        world_gen_chunks_right(w);
+        back_left = back_left->right;
+    }
 
-        if (diff[2] > 0.f)
-        {
-            world_gen_chunks_right(w);
-            back_left = back_left->right;
-        }
-
+    if (shifted)
+    {
         world_fill_chunk_array(w, back_left);
+
+        for (int x = 0; x < RENDER_DISTANCE; ++x)
+        {
+            struct Chunk *left = w->chunks[x][0];
+            struct Chunk *right = w->chunks[x][RENDER_DISTANCE - 1];
+
+            if (l)
+            {
+                chunk_update_blockstates(left);
+                chunk_update_blockstates(left->right);
+            }
+
+            if (r)
+            {
+                chunk_update_blockstates(right);
+                chunk_update_blockstates(right->left);
+            }
+        }
+
+        for (int z = 0; z < RENDER_DISTANCE; ++z)
+        {
+            struct Chunk *front = w->chunks[RENDER_DISTANCE - 1][z];
+            struct Chunk *back = w->chunks[0][z];
+
+            if (f)
+            {
+                chunk_update_blockstates(front);
+                chunk_update_blockstates(front->back);
+            }
+
+            if (b)
+            {
+                chunk_update_blockstates(back);
+                chunk_update_blockstates(back->front);
+            }
+        }
+
+        /* for (int x = 0; x < RENDER_DISTANCE; ++x) */
+        /* { */
+        /*     for (int z = 0; z < RENDER_DISTANCE; ++z) */
+        /*     { */
+        /*         chunk_update_blockstates(w->chunks[x][z]); */
+        /*     } */
+        /* } */
+    }
 
         /* vec3 move = { */
         /*     diff[0] ? (diff[0] < 0 ? -16.f : 16.f) : 0, */
@@ -453,7 +512,7 @@ void world_gen_chunks(struct World *w, vec3 cam)
         /*         chunk_update_blockstates(w->chunks[x][z]); */
         /*     } */
         /* } */
-    }
+    /* } */
 }
 
 
