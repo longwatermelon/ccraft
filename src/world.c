@@ -21,6 +21,14 @@ struct World *world_alloc()
         }
     }
 
+    for (int x = -i; x < i; x += 16)
+    {
+        for (int z = -i; z < i; z += 16)
+        {
+            chunk_gen_trees(w->chunks[(x + i) / 16][(z + i) / 16]);
+        }
+    }
+
     for (int x = 0; x < RENDER_DISTANCE; ++x)
     {
         for (int z = 0; z < RENDER_DISTANCE; ++z)
@@ -35,10 +43,12 @@ struct World *world_alloc()
     w->cz = RENDER_DISTANCE;
     w->cx = RENDER_DISTANCE;
 
-    w->ntexs = 2;
+    w->ntexs = 4;
     w->texs = malloc(sizeof(struct CubeTexture*) * w->ntexs);
     w->texs[0] = ct_alloc((vec2){ 0.f, 0.f }, (vec2){ 200.f, 0.f }, (vec3){ 100.f, 0.f });
     w->texs[1] = ct_alloc((vec2){ 200.f, 0.f }, (vec2){ 200.f, 0.f }, (vec2){ 200.f, 0.f });
+    w->texs[2] = ct_alloc((vec2){ 300.f, 0.f }, (vec2){ 300.f, 0.f }, (vec2){ 400.f, 0.f });
+    w->texs[3] = ct_alloc((vec2){ 0.f, 100.f }, (vec2){ 0.f, 100.f }, (vec2){ 0.f, 100.f });
 
     w->atlas = tex_alloc("res/atlas.png");
 
@@ -121,7 +131,7 @@ struct Chunk *world_adjacent_chunk(struct World *w, struct Chunk *c, vec3 dir)
     if (ix < 0 || ix >= RENDER_DISTANCE || iz < 0 || iz >= RENDER_DISTANCE)
         return 0;
 
-    return w->chunks[idx[0] + (int)dir[0]][idx[1] + (int)dir[2]];
+    return w->chunks[ix][iz];
 
     /* vec3 offset; */
     /* glm_vec3_scale(dir, 16.f, offset); */
@@ -452,12 +462,14 @@ void world_gen_chunks(struct World *w, vec3 cam)
 
             if (l)
             {
+                chunk_gen_trees(left);
                 chunk_update_blockstates(left);
                 chunk_update_blockstates(left->right);
             }
 
             if (r)
             {
+                chunk_gen_trees(right);
                 chunk_update_blockstates(right);
                 chunk_update_blockstates(right->left);
             }
@@ -470,12 +482,14 @@ void world_gen_chunks(struct World *w, vec3 cam)
 
             if (f)
             {
+                chunk_gen_trees(front);
                 chunk_update_blockstates(front);
                 chunk_update_blockstates(front->back);
             }
 
             if (b)
             {
+                chunk_gen_trees(back);
                 chunk_update_blockstates(back);
                 chunk_update_blockstates(back->front);
             }

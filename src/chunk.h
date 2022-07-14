@@ -19,7 +19,9 @@ enum
 {
     BLOCK_AIR,
     BLOCK_GRASS,
-    BLOCK_DIRT
+    BLOCK_DIRT,
+    BLOCK_LOG,
+    BLOCK_LEAVES
 };
 
 enum
@@ -57,11 +59,17 @@ void chunk_free(struct Chunk *c);
 void chunk_visible_verts(struct Chunk *c, struct Camera *cam, float **vertbuffer, size_t *count, size_t *capacity, ivec3 selected);
 void chunk_face_at(struct Chunk *c, ivec3 pos, float **verts, size_t *nverts, size_t *capacity, float *face, ivec3 selected);
 
+// Out: out
+// Returns chunk the index is for, 0 if nonexistent
+struct Chunk *chunk_index(struct Chunk *c, ivec3 pos, bool check_adjacent, ivec3 out);
 int chunk_get(struct Chunk *c, ivec3 pos, bool check_adjacent);
+void chunk_place(struct Chunk *c, ivec3 pos, bool check_adjacent, int block);
 
 void chunk_find_highest(struct Chunk *c);
 void chunk_update_blockstates(struct Chunk *c);
 void chunk_gen_terrain(struct Chunk *c);
+void chunk_gen_trees(struct Chunk *c);
+void chunk_gen_tree_leaves(struct Chunk *c, ivec3 top);
 
 #endif
 

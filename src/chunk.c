@@ -207,36 +207,48 @@ void chunk_face_at(struct Chunk *c, ivec3 pos, float **verts, size_t *nverts, si
 }
 
 
+struct Chunk *chunk_index(struct Chunk *c, ivec3 pos, bool check_adjacent, ivec3 out)
+{
+    if (pos[1] < 0 || pos[1] >= 256)
+        return 0;
+
+    bool x = pos[0] < 0 || pos[0] >= 16;
+    bool z = pos[2] < 0 || pos[2] >= 16;
+
+    if (x || z)
+    {
+        int sigx = x ? (pos[0] < 0 ? -1 : 1) : 0;
+        int sigz = z ? (pos[2] < 0 ? -1 : 1) : 0;
+
+        vec3 dir = { sigx, 0.f, sigz };
+        struct Chunk *adjacent = world_adjacent_chunk(c->world, c, dir);
+
+        if (adjacent)
+        {
+            out[0] = x ? (pos[0] - sigx * 16) : pos[0];
+            out[2] = z ? (pos[2] - sigz * 16) : pos[2];
+            out[1] = pos[1];
+        }
+
+        return adjacent;
+    }
+
+    memcpy(out, pos, sizeof(int) * 3);
+    return c;
+}
+
+
 int chunk_get(struct Chunk *c, ivec3 pos, bool check_adjacent)
 {
     if (check_adjacent)
     {
-        if (pos[1] < 0 || pos[1] >= 256)
+        ivec3 index;
+        struct Chunk *adjacent = chunk_index(c, pos, check_adjacent, index);
+
+        if (adjacent)
+            return adjacent->grid[index[0]][index[1]][index[2]];
+        else
             return 0;
-
-        bool x = pos[0] < 0 || pos[0] >= 16;
-        bool z = pos[2] < 0 || pos[2] >= 16;
-
-        if (x || z)
-        {
-            int sigx = x ? (pos[0] < 0 ? -1 : 1) : 0;
-            int sigz = z ? (pos[2] < 0 ? -1 : 1) : 0;
-
-            vec3 dir = { sigx, 0.f, sigz };
-            struct Chunk *adjacent = world_adjacent_chunk(c->world, c, dir);
-
-            if (adjacent)
-            {
-                int ix = x ? (pos[0] - sigx * 16) : pos[0];
-                int iz = z ? (pos[2] - sigz * 16) : pos[2];
-
-                return adjacent->grid[ix][pos[1]][iz];
-            }
-            else
-            {
-                return 0;
-            }
-        }
     }
     else
     {
@@ -245,6 +257,21 @@ int chunk_get(struct Chunk *c, ivec3 pos, bool check_adjacent)
     }
 
     return c->grid[pos[0]][pos[1]][pos[2]];
+}
+
+
+void chunk_place(struct Chunk *c, ivec3 pos, bool check_adjacent, int block)
+{
+    ivec3 index;
+    struct Chunk *adjacent = chunk_index(c, pos, true, index);
+
+    if (adjacent)
+    {
+        adjacent->grid[index[0]][index[1]][index[2]] = block;
+
+        if (index[1] > adjacent->heightmap[index[0]][index[2]])
+            adjacent->heightmap[index[0]][index[2]] = index[1];
+    }
 }
 
 
@@ -325,5 +352,51 @@ void chunk_gen_terrain(struct Chunk *c)
             }
         }
     }
+}
+
+
+void chunk_gen_trees(struct Chunk *c)
+{
+    for (int x = 0; x < 16; ++x)
+    {
+        for (int z = 0; z < 16; ++z)
+        {
+            int res = rand() % 5 + 5;
+            /* float res = simplex2((c->pos[0] +x) * .02f, (c->pos[2] + z) * .02f, 8, .6f, 1.f); */
+
+            if (rand() % 1000 == 0)
+            {
+                int y = c->heightmap[x][z] + 1;
+                c->grid[x][y - 1][z] = BLOCK_DIRT;
+
+                for (int i = 0; i < res; ++i)
+                    c->grid[x][y + i][z] = BLOCK_LOG;
+
+                c->heightmap[x][z] = y + res;
+                chunk_gen_tree_leaves(c, (ivec3){ x, c->heightmap[x][z], z });
+            }
+        }
+    }
+}
+
+
+void chunk_gen_tree_leaves(struct Chunk *c, ivec3 top)
+{
+    for (int r = 1; r <= 2; ++r)
+    {
+        for (int x = -r; x <= r; ++x)
+        {
+            for (int z = -r; z <= r; ++z)
+            {
+                ivec3 pos = { top[0] + x, top[1] + 1 - r, top[2] + z };
+
+                // Place only if air
+                if (!chunk_get(c, pos, true))
+                    chunk_place(c, pos, true, BLOCK_LEAVES);
+            }
+        }
+    }
+
+    chunk_place(c, (ivec3){ top[0], top[1] + 1, top[2] }, true, BLOCK_LEAVES);
 }
 
