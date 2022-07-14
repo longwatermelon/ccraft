@@ -11,6 +11,8 @@ struct Player
 {
     struct Camera *cam;
     vec3 vel;
+
+    int block;
 };
 
 struct Player *player_alloc();

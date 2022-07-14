@@ -7,6 +7,8 @@ struct Player *player_alloc()
     p->cam = cam_alloc((vec3){ 0.f, 50.f, 0.f }, (vec3){ 0.f, 0.f, 0.f });
     glm_vec3_copy((vec3){ 0.f, 0.f, 0.f }, p->vel);
 
+    p->block = BLOCK_DIRT;
+
     return p;
 }
 
@@ -154,7 +156,7 @@ void player_place_block(struct Player *p, struct World *w)
             break;
         }
 
-        c->grid[coords[0]][coords[1]][coords[2]] = BLOCK_DIRT;
+        c->grid[coords[0]][coords[1]][coords[2]] = p->block;
         chunk_find_highest(c);
         chunk_update_blockstates(c);
     }

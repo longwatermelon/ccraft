@@ -232,6 +232,15 @@ void prog_events(struct Prog *p)
         player_place_block(p->player, p->world);
     }
 
+    if (glfwGetMouseButton(p->win, GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_PRESS)
+    {
+        struct Chunk *c;
+        ivec3 coords;
+        int type;
+        if (world_cast_ray(p->world, p->player->cam, &c, coords, &type) != INFINITY)
+            p->player->block = c->grid[coords[0]][coords[1]][coords[2]];
+    }
+
 /*     if (glfwGetKey(p->win, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) p->cam->pos[1] -= move; */
 /*     if (glfwGetKey(p->win, GLFW_KEY_SPACE) == GLFW_PRESS) p->cam->pos[1] += move; */
 }
