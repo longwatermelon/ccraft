@@ -357,9 +357,9 @@ void chunk_gen_terrain(struct Chunk *c)
 
 void chunk_gen_trees(struct Chunk *c)
 {
-    for (int x = 0; x < 16; ++x)
+    for (int x = 2; x < 14; ++x)
     {
-        for (int z = 0; z < 16; ++z)
+        for (int z = 0; z < 14; ++z)
         {
             int res = rand() % 5 + 5;
             /* float res = simplex2((c->pos[0] +x) * .02f, (c->pos[2] + z) * .02f, 8, .6f, 1.f); */
